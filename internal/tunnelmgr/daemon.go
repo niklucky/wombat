@@ -128,3 +128,70 @@ func OpenLogFile(name string) (*os.File, error) {
 	}
 	return os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 }
+
+// RemoveLogFile deletes a tunnel's log file.
+func RemoveLogFile(name string) error {
+	path, err := LogFilePath(name)
+	if err != nil {
+		return err
+	}
+	return os.Remove(path)
+}
+
+// TrayPidFilePath returns the path to the tray daemon PID file.
+func TrayPidFilePath() (string, error) {
+	dir, err := PidDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "tray-daemon.pid"), nil
+}
+
+// WriteTrayPidFile writes the current process PID to the tray daemon PID file.
+func WriteTrayPidFile() error {
+	path, err := TrayPidFilePath()
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
+	return os.WriteFile(path, []byte(strconv.Itoa(os.Getpid())), 0600)
+}
+
+// RemoveTrayPidFile removes the tray daemon PID file.
+func RemoveTrayPidFile() error {
+	path, err := TrayPidFilePath()
+	if err != nil {
+		return err
+	}
+	return os.Remove(path)
+}
+
+// IsTrayRunning checks if the tray daemon process is alive.
+// It also cleans up stale PID files for dead processes.
+func IsTrayRunning() bool {
+	path, err := TrayPidFilePath()
+	if err != nil {
+		return false
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	pid, err := strconv.Atoi(string(data))
+	if err != nil {
+		_ = os.Remove(path)
+		return false
+	}
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		_ = os.Remove(path)
+		return false
+	}
+	if err := proc.Signal(syscall.Signal(0)); err != nil {
+		_ = os.Remove(path)
+		return false
+	}
+	return true
+}

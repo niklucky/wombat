@@ -17,6 +17,7 @@ type Manager struct {
 	clients   map[string]*ssh.Client
 	listeners map[string]net.Listener
 	quit      map[string]chan struct{}
+	wg        map[string]*sync.WaitGroup
 }
 
 // NewManager creates a new tunnel manager.
@@ -25,6 +26,7 @@ func NewManager() *Manager {
 		clients:   make(map[string]*ssh.Client),
 		listeners: make(map[string]net.Listener),
 		quit:      make(map[string]chan struct{}),
+		wg:        make(map[string]*sync.WaitGroup),
 	}
 }
 
@@ -52,17 +54,24 @@ func (m *Manager) Start(tunnel core.Tunnel, host core.Host) error {
 	m.listeners[tunnel.Name] = listener
 	m.quit[tunnel.Name] = make(chan struct{})
 
-	go m.serve(tunnel, client, listener, m.quit[tunnel.Name])
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	m.wg[tunnel.Name] = wg
+
+	go func() {
+		defer wg.Done()
+		m.serve(tunnel, client, listener, m.quit[tunnel.Name])
+	}()
 	return nil
 }
 
-// Stop closes an active tunnel.
+// Stop closes an active tunnel and waits for the serve goroutine to fully exit.
 func (m *Manager) Stop(name string) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	quit, ok := m.quit[name]
 	if !ok {
+		m.mu.Unlock()
 		return fmt.Errorf("tunnel %q not active", name)
 	}
 	close(quit)
@@ -74,9 +83,16 @@ func (m *Manager) Stop(name string) error {
 		c.Close()
 	}
 
+	wg := m.wg[name]
 	delete(m.clients, name)
 	delete(m.listeners, name)
 	delete(m.quit, name)
+	delete(m.wg, name)
+	m.mu.Unlock()
+
+	if wg != nil {
+		wg.Wait()
+	}
 	return nil
 }
 

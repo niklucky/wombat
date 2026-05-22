@@ -6,12 +6,12 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"fyne.io/systray"
 	"github.com/niklucky/wombat/internal/core"
 	"github.com/niklucky/wombat/internal/notify"
-	"github.com/niklucky/wombat/internal/sshconfig"
 	"github.com/niklucky/wombat/internal/tunnelmgr"
 )
 
@@ -23,16 +23,18 @@ type tunnelMenu struct {
 }
 
 // RunWithTunnels starts the system tray application with tunnel support.
-func RunWithTunnels(cfg core.Config, mgr *tunnelmgr.Manager) {
-	systray.Run(func() { onReady(cfg, mgr) }, onExit)
+func RunWithTunnels(cfg core.Config) {
+	systray.Run(func() { onReady(cfg) }, onExit)
 }
 
-func onReady(cfg core.Config, mgr *tunnelmgr.Manager) {
+func onReady(cfg core.Config) {
+	_ = tunnelmgr.WriteTrayPidFile()
+
 	if data, err := os.ReadFile("assets/tray-icon.png"); err == nil {
 		systray.SetIcon(data)
 	}
 
-	updateTrayStatus(cfg, mgr)
+	updateTrayStatus(cfg)
 
 	// Create a top-level menu item for each tunnel with a submenu
 	tunnelMenus := make(map[string]*tunnelMenu)
@@ -58,13 +60,13 @@ func onReady(cfg core.Config, mgr *tunnelmgr.Manager) {
 		defer ticker.Stop()
 		for {
 			<-ticker.C
-			updateTrayStatus(cfg, mgr)
-			updateTunnelMenuLabels(cfg, mgr, tunnelMenus)
+			updateTrayStatus(cfg)
+			updateTunnelMenuLabels(cfg, tunnelMenus)
 		}
 	}()
 
 	// Initial label update so emojis reflect current state immediately
-	updateTunnelMenuLabels(cfg, mgr, tunnelMenus)
+	updateTunnelMenuLabels(cfg, tunnelMenus)
 
 	go func() {
 		for {
@@ -72,8 +74,18 @@ func onReady(cfg core.Config, mgr *tunnelmgr.Manager) {
 			case <-mNotify.ClickedCh:
 				notify.Notify("Wombat", "Hello from the tray!")
 			case <-mQuit.ClickedCh:
+				active := activeTunnels(cfg)
+				if len(active) > 0 {
+					msg := fmt.Sprintf("Stop %d active tunnel(s) before quitting?", len(active))
+					if askYesNo("Wombat", msg) {
+						for _, name := range active {
+							_ = tunnelmgr.StopDaemon(name)
+							_ = tunnelmgr.RemoveLogFile(name)
+						}
+					}
+				}
 				systray.Quit()
-				os.Exit(0)
+				return
 			}
 		}
 	}()
@@ -82,7 +94,7 @@ func onReady(cfg core.Config, mgr *tunnelmgr.Manager) {
 	for name, tm := range tunnelMenus {
 		go func(n string, menu *tunnelMenu) {
 			for range menu.startStop.ClickedCh {
-				toggleTunnel(cfg, mgr, n, tunnelMenus)
+				toggleTunnel(cfg, n, tunnelMenus)
 			}
 		}(name, tm)
 
@@ -94,55 +106,41 @@ func onReady(cfg core.Config, mgr *tunnelmgr.Manager) {
 	}
 }
 
-func toggleTunnel(cfg core.Config, mgr *tunnelmgr.Manager, name string, menus map[string]*tunnelMenu) {
-	tunnel := cfg.FindTunnel(name)
-	if tunnel == nil {
-		return
-	}
-	host := cfg.FindHost(tunnel.HostName)
-	if host == nil {
-		resolved, err := sshconfig.Resolve(tunnel.HostName)
-		if err != nil {
-			return
-		}
-		host = &resolved
-	}
-
-	running := tunnelmgr.IsRunning(name) || mgr.IsActive(name)
+func toggleTunnel(cfg core.Config, name string, menus map[string]*tunnelMenu) {
+	running := tunnelmgr.IsRunning(name)
 	if running {
-		var stopped bool
-		if tunnelmgr.IsRunning(name) {
-			if err := tunnelmgr.StopDaemon(name); err == nil {
-				stopped = true
-			}
-		}
-		if mgr.IsActive(name) {
-			if err := mgr.Stop(name); err == nil {
-				stopped = true
-			}
-		}
-		if stopped {
+		if err := tunnelmgr.StopDaemon(name); err == nil {
+			_ = tunnelmgr.RemoveLogFile(name)
 			notify.Notify("Wombat", fmt.Sprintf("Tunnel %s stopped", name))
-			updateTrayStatus(cfg, mgr)
-			updateTunnelMenuLabels(cfg, mgr, menus)
+			updateTrayStatus(cfg)
+			updateTunnelMenuLabels(cfg, menus)
 		}
 	} else {
-		if err := mgr.Start(*tunnel, *host); err != nil {
+		if err := startTunnelProcess(name); err != nil {
 			notify.Alert("Wombat", fmt.Sprintf("Failed to start tunnel %s: %v", name, err))
 		} else {
 			notify.Notify("Wombat", fmt.Sprintf("Tunnel %s started", name))
-			updateTrayStatus(cfg, mgr)
-			updateTunnelMenuLabels(cfg, mgr, menus)
+			updateTrayStatus(cfg)
+			updateTunnelMenuLabels(cfg, menus)
 		}
 	}
 }
 
-func onExit() {
-	// Cleanup
+func startTunnelProcess(name string) error {
+	exe, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	cmd := exec.Command(exe, "tunnel-start", name)
+	return cmd.Run()
 }
 
-func updateTrayStatus(cfg core.Config, mgr *tunnelmgr.Manager) {
-	active := activeTunnels(cfg, mgr)
+func onExit() {
+	_ = tunnelmgr.RemoveTrayPidFile()
+}
+
+func updateTrayStatus(cfg core.Config) {
+	active := activeTunnels(cfg)
 	count := len(active)
 
 	if count == 0 {
@@ -158,13 +156,13 @@ func updateTrayStatus(cfg core.Config, mgr *tunnelmgr.Manager) {
 	}
 }
 
-func updateTunnelMenuLabels(cfg core.Config, mgr *tunnelmgr.Manager, menus map[string]*tunnelMenu) {
+func updateTunnelMenuLabels(cfg core.Config, menus map[string]*tunnelMenu) {
 	for _, t := range cfg.Tunnels {
 		menu, ok := menus[t.Name]
 		if !ok {
 			continue
 		}
-		running := tunnelmgr.IsRunning(t.Name) || mgr.IsActive(t.Name)
+		running := tunnelmgr.IsRunning(t.Name)
 		elapsed := ""
 		if running {
 			elapsed = tunnelElapsed(t.Name)
@@ -189,14 +187,14 @@ func tunnelLabel(name string, active bool, elapsed string) string {
 	return fmt.Sprintf("%s %s", emoji, name)
 }
 
-func activeTunnels(cfg core.Config, mgr *tunnelmgr.Manager) []string {
+func activeTunnels(cfg core.Config) []string {
 	var names []string
 	seen := make(map[string]bool)
 	for _, t := range cfg.Tunnels {
 		if seen[t.Name] {
 			continue
 		}
-		if tunnelmgr.IsRunning(t.Name) || mgr.IsActive(t.Name) {
+		if tunnelmgr.IsRunning(t.Name) {
 			names = append(names, t.Name)
 			seen[t.Name] = true
 		}
@@ -247,4 +245,26 @@ func openFile(path string) error {
 	default:
 		return fmt.Errorf("unsupported platform: %s", runtime.GOOS)
 	}
+}
+
+// askYesNo shows a native yes/no dialog. Returns true if the user chose Yes.
+func askYesNo(title, message string) bool {
+	switch runtime.GOOS {
+	case "darwin":
+		script := fmt.Sprintf(`display dialog %q buttons {"Yes", "No"} default button "No" with title %q`, message, title)
+		out, err := exec.Command("osascript", "-e", script).Output()
+		return err == nil && strings.Contains(string(out), "Yes")
+	case "linux":
+		cmd := exec.Command("zenity", "--question", "--title", title, "--text", message)
+		err := cmd.Run()
+		return err == nil
+	case "windows":
+		script := fmt.Sprintf(
+			`Add-Type -AssemblyName System.Windows.Forms; $r=[System.Windows.Forms.MessageBox]::Show(%q,%q,"YesNo"); exit [int]($r -ne "Yes")`,
+			message, title,
+		)
+		err := exec.Command("powershell", "-Command", script).Run()
+		return err == nil
+	}
+	return false
 }
