@@ -1,0 +1,28 @@
+# Binaries
+wombat
+wombat-gui
+*.exe
+
+# Build output
+dist/
+
+# Go
+vendor/
+*.test
+*.out
+coverage.html
+coverage.out
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Config (for local testing)
+/config.json
