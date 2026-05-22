@@ -65,16 +65,12 @@ func onReady(cfg core.Config, mgr *tunnelmgr.Manager) {
 					}
 					host = &resolved
 				}
-				if mgr.IsActive(n) {
-					if err := mgr.Stop(n); err == nil {
-						tunnel.Active = false
-						cfg.Save()
+				if tunnelmgr.IsRunning(n) {
+					if err := tunnelmgr.StopDaemon(n); err == nil {
 						notify.Notify("Wombat", fmt.Sprintf("Tunnel %s stopped", n))
 					}
 				} else {
 					if err := mgr.Start(*tunnel, *host); err == nil {
-						tunnel.Active = true
-						cfg.Save()
 						notify.Notify("Wombat", fmt.Sprintf("Tunnel %s started", n))
 					}
 				}
