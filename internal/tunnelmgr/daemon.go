@@ -35,8 +35,8 @@ func pidFilePath(name string) (string, error) {
 	return filepath.Join(dir, fmt.Sprintf("%s.pid", name)), nil
 }
 
-// logFilePath returns the path to a tunnel's log file.
-func logFilePath(name string) (string, error) {
+// LogFilePath returns the path to a tunnel's log file.
+func LogFilePath(name string) (string, error) {
 	dir, err := LogDir()
 	if err != nil {
 		return "", err
@@ -119,7 +119,7 @@ func StopDaemon(name string) error {
 
 // OpenLogFile opens the log file for a tunnel, creating directories if needed.
 func OpenLogFile(name string) (*os.File, error) {
-	path, err := logFilePath(name)
+	path, err := LogFilePath(name)
 	if err != nil {
 		return nil, err
 	}
