@@ -79,6 +79,7 @@ func ReadPid(name string) (int, error) {
 }
 
 // IsRunning checks if a tunnel's daemon process is alive.
+// It also cleans up stale PID files for dead processes.
 func IsRunning(name string) bool {
 	pid, err := ReadPid(name)
 	if err != nil {
@@ -86,11 +87,15 @@ func IsRunning(name string) bool {
 	}
 	proc, err := os.FindProcess(pid)
 	if err != nil {
+		_ = RemovePidFile(name)
 		return false
 	}
 	// Signal 0 checks if process exists without sending a real signal
-	err = proc.Signal(syscall.Signal(0))
-	return err == nil
+	if err := proc.Signal(syscall.Signal(0)); err != nil {
+		_ = RemovePidFile(name)
+		return false
+	}
+	return true
 }
 
 // StopDaemon sends a termination signal to a tunnel's daemon process.
