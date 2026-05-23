@@ -1,6 +1,6 @@
 # Binaries
-wombat
-wombat-gui
+/wombat
+/wombat-gui
 *.exe
 
 # Build output
