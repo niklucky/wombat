@@ -17,6 +17,13 @@ import (
 // and targets the remote as `user@address`. It resolves the `ssh` binary via PATH and returns an error if `ssh` is not found
 // or if the process replacement fails.
 func execSSH(host core.Host) error {
+	if host.User == "" {
+		return fmt.Errorf("missing host.User")
+	}
+	if host.Address == "" {
+		return fmt.Errorf("missing host.Address")
+	}
+
 	port := host.Port
 	if port == 0 {
 		port = 22

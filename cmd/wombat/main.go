@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"syscall"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
@@ -35,10 +36,14 @@ var rootCmd = &cobra.Command{
 		// Start tray daemon in background process (only if enabled and not already running)
 		if cfg.OpenTray && !tunnelmgr.IsTrayRunning() {
 			exe, err := os.Executable()
-			if err == nil {
+			if err != nil {
+				log.Printf("failed to locate executable for tray-daemon: %v", err)
+			} else {
 				trayDaemon := exec.Command(exe, "tray-daemon")
 				trayDaemon.SysProcAttr = daemonSysProcAttr()
-				_ = trayDaemon.Start()
+				if startErr := trayDaemon.Start(); startErr != nil {
+					log.Printf("failed to start tray-daemon: %v", startErr)
+				}
 			}
 		}
 
@@ -288,6 +293,9 @@ var removeTunnelCmd = &cobra.Command{
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		if tunnelmgr.IsRunning(args[0]) {
+			return fmt.Errorf("tunnel %q is still running; stop it before removing", args[0])
+		}
 		cfg.RemoveTunnel(args[0])
 		if err := cfg.Save(); err != nil {
 			return err
@@ -434,6 +442,39 @@ var tunnelStartCmd = &cobra.Command{
 
 		if err := daemonCmd.Start(); err != nil {
 			return fmt.Errorf("start daemon: %w", err)
+		}
+
+		waitCh := make(chan error, 1)
+		go func() {
+			waitCh <- daemonCmd.Wait()
+		}()
+
+		ticker := time.NewTicker(200 * time.Millisecond)
+		defer ticker.Stop()
+		timeout := time.After(5 * time.Second)
+		ready := false
+	loop:
+		for {
+			select {
+			case <-timeout:
+				break loop
+			case <-waitCh:
+				break loop
+			case <-ticker.C:
+				if tunnelmgr.IsRunning(name) {
+					ready = true
+					break loop
+				}
+			}
+		}
+
+		if !ready {
+			_ = logFile.Sync()
+			logData, _ := os.ReadFile(logFile.Name())
+			if len(logData) > 0 {
+				return fmt.Errorf("tunnel %q failed to start; log output:\n%s", name, string(logData))
+			}
+			return fmt.Errorf("tunnel %q failed to start (see log: %s)", name, logFile.Name())
 		}
 
 		fmt.Printf("Tunnel %q started in background (PID %d).\n", name, daemonCmd.Process.Pid)
