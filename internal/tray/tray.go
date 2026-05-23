@@ -111,7 +111,7 @@ func toggleTunnel(cfg core.Config, name string, menus map[string]*tunnelMenu) {
 	if running {
 		if err := tunnelmgr.StopDaemon(name); err == nil {
 			_ = tunnelmgr.RemoveLogFile(name)
-			notify.Notify("Wombat", fmt.Sprintf("Tunnel %s stopped", name))
+			notify.Alert("Wombat", fmt.Sprintf("Tunnel %s stopped", name))
 			updateTrayStatus(cfg)
 			updateTunnelMenuLabels(cfg, menus)
 		}

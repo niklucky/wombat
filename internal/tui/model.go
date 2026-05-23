@@ -17,20 +17,21 @@ import (
 
 // Model is the root Bubble Tea model.
 type Model struct {
-	config        core.Config
-	activeTab     string
-	view          string
+	config          core.Config
+	activeTab       string
+	view            string
 
-	tunnelTable   table.Model
-	hostTable     table.Model
+	tunnelTable     table.Model
+	hostTable       table.Model
 
-	formInputs    []textinput.Model
-	formFocus     int
-	formIsCreate  bool
-	editingTunnel *core.Tunnel
+	formInputs      []textinput.Model
+	formFocus       int
+	formIsCreate    bool
+	editingTunnel   *core.Tunnel
 
-	confirmItem   string
-	SelectedHost  *core.Host
+	confirmItem     string
+	SelectedHost    *core.Host
+	RestartRequired bool
 }
 
 // NewModel creates a new TUI model with the given config.
@@ -54,6 +55,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.view {
 	case "tunnel_form":
 		return m.formUpdate(msg)
+	case "settings_form":
+		return m.settingsFormUpdate(msg)
 	case "confirm_delete":
 		return m.confirmUpdate(msg)
 	default:
@@ -66,6 +69,8 @@ func (m Model) View() string {
 	switch m.view {
 	case "tunnel_form":
 		return m.formView()
+	case "settings_form":
+		return m.settingsFormView()
 	case "confirm_delete":
 		return renderConfirmDelete(m.confirmItem)
 	default:
@@ -108,6 +113,8 @@ func (m *Model) tableUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.activeTab == "hosts" {
 				// TODO: add host form
 			}
+		case "s":
+			m.initSettingsForm()
 		case "t":
 			if m.activeTab == "hosts" {
 				m.testSelectedHost()

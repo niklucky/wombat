@@ -6,24 +6,26 @@ import (
 	"path/filepath"
 	"strconv"
 	"syscall"
+
+	"github.com/niklucky/wombat/internal/core"
 )
 
 // PidDir returns the directory where PID files are stored.
 func PidDir() (string, error) {
-	dir, err := os.UserConfigDir()
+	home, err := core.AppHome()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "wombat", "pids"), nil
+	return filepath.Join(home, "pids"), nil
 }
 
 // LogDir returns the directory where tunnel logs are stored.
 func LogDir() (string, error) {
-	dir, err := os.UserConfigDir()
+	home, err := core.AppHome()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "wombat", "logs"), nil
+	return filepath.Join(home, "logs"), nil
 }
 
 // pidFilePath returns the path to a tunnel's PID file.

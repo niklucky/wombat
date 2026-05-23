@@ -12,27 +12,32 @@ import (
 // Config holds the application configuration.
 // Hosts are stored in ~/.ssh/config.d/wombat; tunnels and keys stay in JSON.
 type Config struct {
-	Hosts   []models.Host   `json:"-"`
-	Keys    []models.Key    `json:"keys"`
-	Tunnels []models.Tunnel `json:"tunnels"`
+	OpenTray     bool            `json:"open_tray"`
+	ShowNotify   bool            `json:"show_notifications"`
+	Hosts        []models.Host   `json:"-"`
+	Keys         []models.Key    `json:"keys"`
+	Tunnels      []models.Tunnel `json:"tunnels"`
 }
 
 // DefaultConfig returns an empty default configuration.
 func DefaultConfig() Config {
 	return Config{
-		Hosts:   []models.Host{},
-		Keys:    []models.Key{},
-		Tunnels: []models.Tunnel{},
+		OpenTray:   true,
+		ShowNotify: true,
+		Hosts:      []models.Host{},
+		Keys:       []models.Key{},
+		Tunnels:    []models.Tunnel{},
 	}
 }
 
-// ConfigPath returns the OS-appropriate path to the wombat JSON config file.
+// ConfigPath returns the path to the wombat JSON config file.
+// It lives inside the configured AppHome.
 func ConfigPath() (string, error) {
-	dir, err := os.UserConfigDir()
+	home, err := AppHome()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "wombat", "config.json"), nil
+	return filepath.Join(home, "config.json"), nil
 }
 
 // Load reads tunnels/keys from JSON and hosts from SSH config.
@@ -76,11 +81,15 @@ func (c *Config) Save() error {
 	}
 
 	jsonCfg := struct {
-		Keys    []models.Key    `json:"keys"`
-		Tunnels []models.Tunnel `json:"tunnels"`
+		OpenTray   bool            `json:"open_tray"`
+		ShowNotify bool            `json:"show_notifications"`
+		Keys       []models.Key    `json:"keys"`
+		Tunnels    []models.Tunnel `json:"tunnels"`
 	}{
-		Keys:    c.Keys,
-		Tunnels: c.Tunnels,
+		OpenTray:   c.OpenTray,
+		ShowNotify: c.ShowNotify,
+		Keys:       c.Keys,
+		Tunnels:    c.Tunnels,
 	}
 	data, err := json.MarshalIndent(jsonCfg, "", "  ")
 	if err != nil {
