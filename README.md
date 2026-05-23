@@ -1,5 +1,7 @@
 # Wombat
 
+![Wombat](assets/app-icon-128.png)
+
 A cross-platform SSH helper built with Go. Features a Terminal UI (TUI), system tray application, desktop notifications, and an optional GUI.
 
 ## Features

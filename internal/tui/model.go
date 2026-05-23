@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"syscall"
 
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/niklucky/wombat/internal/core"
 	"github.com/niklucky/wombat/internal/notify"
+	"github.com/niklucky/wombat/internal/platform"
 	"github.com/niklucky/wombat/internal/sshutil"
 	"github.com/niklucky/wombat/internal/tunnelmgr"
 )
@@ -103,7 +103,7 @@ func (m *Model) tableUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 				exe = "wombat"
 			}
 			cmd := exec.Command(exe, "tray-daemon")
-			cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+			cmd.SysProcAttr = platform.DaemonSysProcAttr()
 			_ = cmd.Start()
 		case "a":
 			if m.activeTab == "tunnels" {
@@ -214,7 +214,7 @@ func (m *Model) startSelectedTunnel() {
 		exe = "wombat"
 	}
 	cmd := exec.Command(exe, "tunnel-start", t.Name)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	cmd.SysProcAttr = platform.DaemonSysProcAttr()
 	if err := cmd.Start(); err != nil {
 		notify.Alert("Wombat", fmt.Sprintf("Failed to start %s: %v", t.Name, err))
 	} else {
