@@ -2,7 +2,7 @@
 
 ![Wombat](assets/app-icon-128.png)
 
-A cross-platform SSH helper built with Go. Features a Terminal UI (TUI), system tray application, desktop notifications, and an optional GUI.
+A cross-platform SSH helper built with Go. Features a Terminal UI (TUI), system tray application, desktop notifications, and an optional GUI (under development).
 
 ## Features
 
@@ -14,23 +14,59 @@ A cross-platform SSH helper built with Go. Features a Terminal UI (TUI), system 
 
 ## Quick Start
 
+For compiled binaries, see the [Releases](https://github.com/niklucky/wombat/releases) page.
+If you want to build from source:
+
 ```bash
 # Build the standard binary (TUI + tray + CLI)
 make build
 
 # Run the TUI
-./wombat tui
-
-# Run the system tray app
-./wombat tray
+./wombat
 
 # List configured hosts
-./wombat cli list
+./wombat list
 
 # Build with GUI support
 make build-gui
 ./wombat-gui gui
 ```
+
+## CLI Commands
+
+### Host Management
+
+| Command | Description |
+|---------|-------------|
+| `wombat list` | List configured SSH hosts |
+| `wombat add-host <name>` | Add a new host |
+| `wombat remove-host <name>` | Remove a host |
+| `wombat connect <name>` | Connect to a host via SSH |
+| `wombat test <name>` | Test TCP connectivity to a host |
+| `wombat import-ssh-config` | Import hosts from `~/.ssh/config` |
+
+**`add-host` flags:** `--address` (required), `--user` (required), `--port` (default: 22), `--key`
+
+### Tunnel Management
+
+| Command | Description |
+|---------|-------------|
+| `wombat tunnel-list` | List all tunnels (shows active/inactive status) |
+| `wombat add-tunnel <name>` | Add a new port-forwarding tunnel |
+| `wombat remove-tunnel <name>` | Remove a tunnel |
+| `wombat tunnel-start <name>` | Start a tunnel in the background |
+| `wombat tunnel-stop <name>` | Stop a running tunnel |
+
+**`add-tunnel` flags:** `--host` (required), `--local-port` (required), `--remote-port` (required), `--remote-host` (default: localhost)
+
+### Application
+
+| Command | Description |
+|---------|-------------|
+| `wombat` | Launch the TUI (and optional tray daemon) |
+| `wombat tray` | Launch the system tray app |
+| `wombat gui` | Launch the GUI *(requires `-tags gui` build)* |
+| `wombat version` | Print version information |
 
 ## Project Structure
 
