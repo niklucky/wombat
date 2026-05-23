@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main, deploy]
+  pull_request:
+    branches: [main, deploy]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            ext: ''
+          - os: macos-13
+            goos: darwin
+            goarch: amd64
+            ext: ''
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            ext: ''
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            ext: '.exe'
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Debug workspace
+        shell: bash
+        run: |
+          pwd
+          ls -la
+          ls -la cmd/ || true
+          ls -la cmd/wombat/ || true
+
+      - name: Build
+        shell: bash
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: ${{ matrix.goos == 'darwin' && '1' || '0' }}
+        run: |
+          mkdir -p dist
+          ldflags="-s -w"
+          cd cmd/wombat
+          go build -ldflags="${ldflags}" -o "../../dist/wombat${{ matrix.ext }}" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wombat-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/wombat${{ matrix.ext }}
+          retention-days: 3

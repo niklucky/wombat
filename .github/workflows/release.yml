@@ -57,7 +57,8 @@ jobs:
           if [ "${{ github.ref_name }}" != "" ]; then
             ldflags="${ldflags} -X main.version=${{ github.ref_name }}"
           fi
-          go build -ldflags="${ldflags}" -o "dist/wombat${{ matrix.ext }}" ./cmd/wombat
+          cd cmd/wombat
+          go build -ldflags="${ldflags}" -o "../../dist/wombat${{ matrix.ext }}" .
 
       - name: Package
         shell: bash
