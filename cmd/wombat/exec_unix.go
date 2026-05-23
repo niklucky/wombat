@@ -11,6 +11,11 @@ import (
 	"github.com/niklucky/wombat/internal/core"
 )
 
+// execSSH constructs an ssh command from the provided host and replaces the current process with that ssh invocation.
+//
+// The function uses host.Port (defaults to 22 when zero), includes host.KeyPath as a `-i` identity flag when non-empty,
+// and targets the remote as `user@address`. It resolves the `ssh` binary via PATH and returns an error if `ssh` is not found
+// or if the process replacement fails.
 func execSSH(host core.Host) error {
 	port := host.Port
 	if port == 0 {

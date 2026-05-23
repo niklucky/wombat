@@ -10,6 +10,9 @@ import (
 	"github.com/niklucky/wombat/internal/core"
 )
 
+// execSSH launches the Windows `ssh.exe` client to connect to the provided host and returns any error from running the client.
+// It uses host.Port (defaults to 22 when zero), includes host.KeyPath as an `-i` identity option when present, and connects to `host.User@host.Address`.
+// Standard input, output and error are wired to the current process. On successful execution the function calls os.Exit(0); otherwise it returns the error from cmd.Run().
 func execSSH(host core.Host) error {
 	port := host.Port
 	if port == 0 {

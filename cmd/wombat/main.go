@@ -498,6 +498,9 @@ var versionCmd = &cobra.Command{
 	},
 }
 
+// init registers CLI subcommands on rootCmd and configures flags for host and tunnel creation.
+// It attaches commands for host management, tunnel management, GUI/version display, and background daemons,
+// and marks required flags for add-host (`address`, `user`) and add-tunnel (`host`, `local-port`, `remote-port`).
 func init() {
 	rootCmd.AddCommand(
 		listCmd,
@@ -526,6 +529,8 @@ func init() {
 	_ = addTunnelCmd.MarkFlagRequired("remote-port")
 }
 
+// main executes the root Cobra command for the wombat CLI.
+// If execution returns an error, main terminates the process with exit code 1.
 func main() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
