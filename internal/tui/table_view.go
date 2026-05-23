@@ -13,18 +13,18 @@ func (m *Model) initTables() {
 	tunnelCols := []table.Column{
 		{Title: "#", Width: 4},
 		{Title: "", Width: 3},
-		{Title: "Name", Width: 16},
-		{Title: "Host", Width: 16},
+		{Title: "Name", Width: 22},
+		{Title: "Host", Width: 22},
 		{Title: "Forward", Width: 22},
 	}
 	m.tunnelTable = table.New(
 		table.WithColumns(tunnelCols),
 		table.WithFocused(true),
-		table.WithHeight(12),
+		table.WithHeight(20),
 	)
 	m.tunnelTable.SetStyles(table.Styles{
-		Header:   lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FAFAFA")).Background(lipgloss.Color("#7D56F4")).Padding(0, 1),
-		Selected: lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#7D56F4")).Background(lipgloss.Color("#1a1a1a")),
+		Header:   lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FAFAFA")).Padding(0, 1).Border(lipgloss.NormalBorder()).BorderBottom(true).BorderTop(false).BorderLeft(false).BorderRight(false).BorderForeground(lipgloss.Color(primary)),
+		Selected: lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FFFFFF")).Background(lipgloss.Color(primary)),
 		Cell:     lipgloss.NewStyle().Padding(0, 1),
 	})
 	m.refreshTunnelRows()
@@ -32,7 +32,7 @@ func (m *Model) initTables() {
 	// Host table
 	hostCols := []table.Column{
 		{Title: "#", Width: 4},
-		{Title: "Name", Width: 18},
+		{Title: "Name", Width: 24},
 		{Title: "Address", Width: 20},
 		{Title: "User", Width: 14},
 		{Title: "Port", Width: 8},
@@ -40,11 +40,11 @@ func (m *Model) initTables() {
 	m.hostTable = table.New(
 		table.WithColumns(hostCols),
 		table.WithFocused(true),
-		table.WithHeight(12),
+		table.WithHeight(20),
 	)
 	m.hostTable.SetStyles(table.Styles{
-		Header:   lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FAFAFA")).Background(lipgloss.Color("#7D56F4")).Padding(0, 1),
-		Selected: lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#7D56F4")).Background(lipgloss.Color("#1a1a1a")),
+		Header:   lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FAFAFA")).Padding(0, 1).Border(lipgloss.NormalBorder()).BorderBottom(true).BorderTop(false).BorderLeft(false).BorderRight(false).BorderForeground(lipgloss.Color(primary)),
+		Selected: lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FFFFFF")).Background(lipgloss.Color(primary)),
 		Cell:     lipgloss.NewStyle().Padding(0, 1),
 	})
 	m.refreshHostRows()
@@ -131,10 +131,10 @@ func (m *Model) renderTableView() string {
 	// Table content
 	if m.activeTab == "tunnels" {
 		s += m.tunnelTable.View()
-		s += "\n" + helpStyle.Render("  [↑/↓] navigate  [Enter] edit  [c] connect  [d] disconnect  [Backspace] delete  [a] add  [tab] switch  [q] quit")
+		s += "\n" + helpStyle.Render("  [↑/↓] navigate  [↵] edit  [c] connect  [d] disconnect  [⌫] delete  [a] add  [⇥] switch  [q] quit")
 	} else {
 		s += m.hostTable.View()
-		s += "\n" + helpStyle.Render("  [↑/↓] navigate  [Enter] connect  [t] test  [n] add  [tab] switch  [q] quit")
+		s += "\n" + helpStyle.Render("  [↑/↓] navigate  [↵] connect  [t] test  [n] add  [⇥] switch  [q] quit")
 	}
 
 	return s

@@ -2,32 +2,34 @@ package tui
 
 import "github.com/charmbracelet/lipgloss"
 
+// const brown = "#B54600"
+const primary = "#219ed9"
+
 var (
 	titleStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color("#FAFAFA")).
-			Background(lipgloss.Color("#7D56F4")).
-			PaddingLeft(2).
-			PaddingRight(2)
+			Foreground(lipgloss.Color(primary))
 
 	subtitleStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#A0A0A0"))
 
 	tabStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#626262")).
+			Foreground(lipgloss.Color(primary)).
+			Bold(true).
+			Underline(true).
 			Padding(0, 2)
 
 	activeTabStyle = lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color("#FAFAFA")).
-			Background(lipgloss.Color("#7D56F4")).
+			Background(lipgloss.Color(primary)).
 			Padding(0, 2)
 
 	helpStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#626262"))
+			Foreground(lipgloss.Color("#888888"))
 
 	actionStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#7D56F4")).
+			Foreground(lipgloss.Color(primary)).
 			Bold(true)
 
 	formLabelStyle = lipgloss.NewStyle().
@@ -39,13 +41,13 @@ var (
 
 	dialogBoxStyle = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color("#7D56F4")).
+			BorderForeground(lipgloss.Color(primary)).
 			Padding(1, 2)
 
 	confirmTextStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FAFAFA"))
+				Foreground(lipgloss.Color("#FAFAFA"))
 
 	confirmKeyStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#7D56F4")).
+			Foreground(lipgloss.Color(primary)).
 			Bold(true)
 )
