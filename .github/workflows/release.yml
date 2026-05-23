@@ -19,7 +19,7 @@ jobs:
             goarch: arm64
             ext: ''
             archive: tar.gz
-          - os: macos-13
+          - os: macos-15-intel
             goos: darwin
             goarch: amd64
             ext: ''
@@ -68,7 +68,11 @@ jobs:
           cp README.md dist/
           name="wombat-${{ matrix.goos }}-${{ matrix.goarch }}"
           if [ "${{ matrix.archive }}" = "zip" ]; then
-            cd dist && zip -q "${name}.zip" "wombat${{ matrix.ext }}" README.md
+            if command -v zip >/dev/null 2>&1; then
+              cd dist && zip -q "${name}.zip" "wombat${{ matrix.ext }}" README.md
+            else
+              powershell -Command "cd dist; Compress-Archive -Path 'wombat${{ matrix.ext }}', 'README.md' -DestinationPath '${name}.zip'"
+            fi
           else
             tar -czf "dist/${name}.tar.gz" -C dist "wombat${{ matrix.ext }}" README.md
           fi
