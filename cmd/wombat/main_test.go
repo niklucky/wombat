@@ -22,8 +22,9 @@ func setupTempHome(t *testing.T) string {
 	t.Setenv("HOME", tmp)
 	// On Linux, os.UserConfigDir uses $XDG_CONFIG_HOME when set.
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, ".config"))
-	// On Windows, os.UserConfigDir uses %APPDATA%.
+	// On Windows, os.UserConfigDir uses %APPDATA% and os.UserHomeDir uses %USERPROFILE%.
 	t.Setenv("APPDATA", filepath.Join(tmp, "AppData", "Roaming"))
+	t.Setenv("USERPROFILE", tmp)
 
 	// Pre-create SSH directories that EnsureSetup expects.
 	sshDir := filepath.Join(tmp, ".ssh")
