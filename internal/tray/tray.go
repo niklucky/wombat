@@ -19,6 +19,7 @@ import (
 type tunnelMenu struct {
 	item      *systray.MenuItem
 	startStop *systray.MenuItem
+	restart   *systray.MenuItem
 	openLogs  *systray.MenuItem
 }
 
@@ -45,6 +46,7 @@ func onReady(cfg core.Config) {
 			fmt.Sprintf("Tunnel %s", t.Name),
 		)
 		tm.startStop = tm.item.AddSubMenuItem("Start", "Start or stop tunnel")
+		tm.restart = tm.item.AddSubMenuItem("Restart", "Restart tunnel")
 		tm.openLogs = tm.item.AddSubMenuItem("Open logs", "Open tunnel log file")
 		tunnelMenus[t.Name] = tm
 	}
@@ -90,11 +92,17 @@ func onReady(cfg core.Config) {
 		}
 	}()
 
-	// Handle tunnel start/stop and open logs clicks
+	// Handle tunnel start/stop, restart, and open logs clicks
 	for name, tm := range tunnelMenus {
 		go func(n string, menu *tunnelMenu) {
 			for range menu.startStop.ClickedCh {
 				toggleTunnel(cfg, n, tunnelMenus)
+			}
+		}(name, tm)
+
+		go func(n string, menu *tunnelMenu) {
+			for range menu.restart.ClickedCh {
+				restartTunnel(cfg, n, tunnelMenus)
 			}
 		}(name, tm)
 
@@ -123,6 +131,16 @@ func toggleTunnel(cfg core.Config, name string, menus map[string]*tunnelMenu) {
 			updateTrayStatus(cfg)
 			updateTunnelMenuLabels(cfg, menus)
 		}
+	}
+}
+
+func restartTunnel(cfg core.Config, name string, menus map[string]*tunnelMenu) {
+	if err := tunnelmgr.RestartTunnel(name, startTunnelProcess); err != nil {
+		notify.Alert("Wombat", fmt.Sprintf("Failed to restart tunnel %s: %v", name, err))
+	} else {
+		notify.Notify("Wombat", fmt.Sprintf("Tunnel %s restarted", name))
+		updateTrayStatus(cfg)
+		updateTunnelMenuLabels(cfg, menus)
 	}
 }
 

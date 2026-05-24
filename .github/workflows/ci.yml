@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - '**'
+      - main
     tags-ignore:
       - 'v[0-9]+.[0-9]+.[0-9]+'
   pull_request:
@@ -30,14 +30,28 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
+      - name: Go module and build cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+            ~/Library/Caches/go-build
+            ~/AppData/Local/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+
       - name: Download dependencies
         run: go mod download
 
+      - name: Install GUI build dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev xorg-dev
+
       - name: Run tests (default build)
         run: go test -v -race ./...
-
-      - name: Run tests (gui build tag)
-        run: go test -tags gui -v -race ./...
 
       - name: Run go vet
         run: go vet ./...

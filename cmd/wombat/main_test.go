@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -22,6 +23,9 @@ func setupTempHome(t *testing.T) string {
 	t.Setenv("HOME", tmp)
 	// On Linux, os.UserConfigDir uses $XDG_CONFIG_HOME when set.
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, ".config"))
+	// On Windows, os.UserConfigDir uses %APPDATA% and os.UserHomeDir uses %USERPROFILE%.
+	t.Setenv("APPDATA", filepath.Join(tmp, "AppData", "Roaming"))
+	t.Setenv("USERPROFILE", tmp)
 
 	// Pre-create SSH directories that EnsureSetup expects.
 	sshDir := filepath.Join(tmp, ".ssh")
@@ -311,6 +315,43 @@ func TestTunnelStartCmd_requiresExactlyOneArg(t *testing.T) {
 
 	if err == nil {
 		t.Error("expected error when tunnel-start called with no arguments")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// tunnel-restart command
+// ---------------------------------------------------------------------------
+
+func TestTunnelRestartCmd_requiresExactlyOneArg(t *testing.T) {
+	setupTempHome(t)
+
+	var err error
+	rootCmd.SetArgs([]string{"tunnel-restart"})
+	runWithSilence(func() { err = rootCmd.Execute() })
+
+	if err == nil {
+		t.Error("expected error when tunnel-restart called with no arguments")
+	}
+}
+
+func TestTunnelRestartCmd_unknownTunnelReturnsError(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		// Spawning the test binary as a subprocess on Windows causes file-handle
+		// locks that interfere with t.TempDir() cleanup. The restart logic is
+		// covered by internal/tunnelmgr tests on all platforms.
+		t.Skip("skipping on Windows: subprocess file-lock conflict")
+	}
+	setupTempHome(t)
+
+	var err error
+	rootCmd.SetArgs([]string{"tunnel-restart", "nonexistent-tunnel"})
+	runWithSilence(func() { err = rootCmd.Execute() })
+
+	if err == nil {
+		t.Fatal("expected error when restarting an unknown tunnel")
+	}
+	if !strings.Contains(err.Error(), "failed to start") {
+		t.Errorf("expected 'failed to start' in error, got: %q", err.Error())
 	}
 }
 
