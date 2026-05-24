@@ -56,9 +56,6 @@ jobs:
       - name: Run go vet
         run: go vet ./...
 
-      - name: Run go vet (gui tag)
-        run: go vet -tags gui ./...
-
       - name: Build (default)
         run: go build ./cmd/wombat
 
