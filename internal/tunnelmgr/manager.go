@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"sync"
+	"time"
 
 	"github.com/niklucky/wombat/internal/core"
 	"github.com/niklucky/wombat/internal/sshutil"
@@ -13,20 +14,22 @@ import (
 
 // Manager manages active SSH tunnels.
 type Manager struct {
-	mu        sync.RWMutex
-	clients   map[string]*ssh.Client
-	listeners map[string]net.Listener
-	quit      map[string]chan struct{}
-	wg        map[string]*sync.WaitGroup
+	mu            sync.RWMutex
+	clients       map[string]*ssh.Client
+	listeners     map[string]net.Listener
+	quit          map[string]chan struct{}
+	wg            map[string]*sync.WaitGroup
+	keepaliveStop map[string]func()
 }
 
 // NewManager creates a new tunnel manager.
 func NewManager() *Manager {
 	return &Manager{
-		clients:   make(map[string]*ssh.Client),
-		listeners: make(map[string]net.Listener),
-		quit:      make(map[string]chan struct{}),
-		wg:        make(map[string]*sync.WaitGroup),
+		clients:       make(map[string]*ssh.Client),
+		listeners:     make(map[string]net.Listener),
+		quit:          make(map[string]chan struct{}),
+		wg:            make(map[string]*sync.WaitGroup),
+		keepaliveStop: make(map[string]func()),
 	}
 }
 
@@ -53,6 +56,7 @@ func (m *Manager) Start(tunnel core.Tunnel, host core.Host) error {
 	m.clients[tunnel.Name] = client
 	m.listeners[tunnel.Name] = listener
 	m.quit[tunnel.Name] = make(chan struct{})
+	m.keepaliveStop[tunnel.Name] = sshutil.StartKeepalive(client, 30*time.Second)
 
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
@@ -76,6 +80,9 @@ func (m *Manager) Stop(name string) error {
 	}
 	close(quit)
 
+	if stop, ok := m.keepaliveStop[name]; ok {
+		stop()
+	}
 	if l, ok := m.listeners[name]; ok {
 		l.Close()
 	}
@@ -88,6 +95,7 @@ func (m *Manager) Stop(name string) error {
 	delete(m.listeners, name)
 	delete(m.quit, name)
 	delete(m.wg, name)
+	delete(m.keepaliveStop, name)
 	m.mu.Unlock()
 
 	if wg != nil {

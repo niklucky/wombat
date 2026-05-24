@@ -30,8 +30,61 @@ func Dial(host core.Host) (*ssh.Client, error) {
 		Timeout:         10 * time.Second,
 	}
 
-	addr := fmt.Sprintf("%s:%d", host.Address, port)
-	return ssh.Dial("tcp", addr, config)
+	addr := net.JoinHostPort(host.Address, fmt.Sprintf("%d", port))
+	conn, err := net.DialTimeout("tcp", addr, config.Timeout)
+	if err != nil {
+		return nil, err
+	}
+
+	if tcpConn, ok := conn.(*net.TCPConn); ok {
+		tcpConn.SetKeepAlive(true)
+		tcpConn.SetKeepAlivePeriod(30 * time.Second)
+	}
+
+	c, chans, reqs, err := ssh.NewClientConn(conn, addr, config)
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+	return ssh.NewClient(c, chans, reqs), nil
+}
+
+// StartKeepalive starts a background goroutine that sends SSH keepalive
+// requests at the given interval. If a keepalive fails or times out, the
+// client is closed so that callers can detect the broken connection.
+// The returned stop function should be called to clean up the goroutine.
+func StartKeepalive(client *ssh.Client, interval time.Duration) func() {
+	stop := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				if err := sendKeepalive(client); err != nil {
+					client.Close()
+					return
+				}
+			case <-stop:
+				return
+			}
+		}
+	}()
+	return func() { close(stop) }
+}
+
+func sendKeepalive(client *ssh.Client) error {
+	done := make(chan error, 1)
+	go func() {
+		_, _, err := client.SendRequest("keepalive@openssh.com", true, nil)
+		done <- err
+	}()
+	select {
+	case err := <-done:
+		return err
+	case <-time.After(10 * time.Second):
+		return fmt.Errorf("keepalive timed out")
+	}
 }
 
 // TestConnection attempts a TCP dial to the target address and port.
@@ -40,7 +93,7 @@ func TestConnection(host core.Host) error {
 	if port == 0 {
 		port = 22
 	}
-	addr := fmt.Sprintf("%s:%d", host.Address, port)
+	addr := net.JoinHostPort(host.Address, fmt.Sprintf("%d", port))
 	conn, err := net.DialTimeout("tcp", addr, 5*time.Second)
 	if err != nil {
 		return err
