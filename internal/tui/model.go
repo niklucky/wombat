@@ -146,6 +146,10 @@ func (m *Model) tableUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.activeTab == "tunnels" {
 				m.stopSelectedTunnel()
 			}
+		case "r":
+			if m.activeTab == "tunnels" {
+				m.restartSelectedTunnel()
+			}
 		case "backspace":
 			if m.activeTab == "tunnels" {
 				if len(m.config.Tunnels) > 0 {
@@ -239,6 +243,32 @@ func (m *Model) stopSelectedTunnel() {
 		notify.Alert("Wombat", fmt.Sprintf("Failed to stop %s: %v", t.Name, err))
 	} else {
 		notify.Notify("Wombat", fmt.Sprintf("Tunnel %s stopped", t.Name))
+		m.refreshTunnelRows()
+	}
+}
+
+func (m *Model) restartSelectedTunnel() {
+	if len(m.config.Tunnels) == 0 {
+		return
+	}
+	idx := m.tunnelTable.Cursor()
+	if idx >= len(m.config.Tunnels) {
+		return
+	}
+	t := m.config.Tunnels[idx]
+	start := func(name string) error {
+		exe, err := os.Executable()
+		if err != nil {
+			exe = "wombat"
+		}
+		cmd := exec.Command(exe, "tunnel-start", name)
+		cmd.SysProcAttr = platform.DaemonSysProcAttr()
+		return cmd.Start()
+	}
+	if err := tunnelmgr.RestartTunnel(t.Name, start); err != nil {
+		notify.Alert("Wombat", fmt.Sprintf("Failed to restart %s: %v", t.Name, err))
+	} else {
+		notify.Notify("Wombat", fmt.Sprintf("Tunnel %s restarted", t.Name))
 		m.refreshTunnelRows()
 	}
 }

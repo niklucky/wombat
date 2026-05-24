@@ -170,6 +170,19 @@ func RemoveTrayPidFile() error {
 	return os.Remove(path)
 }
 
+// RestartTunnel stops a tunnel if it is running and then calls start.
+func RestartTunnel(name string, start func(string) error) error {
+	if IsRunning(name) {
+		if err := StopDaemon(name); err != nil {
+			return fmt.Errorf("stop tunnel %q: %w", name, err)
+		}
+	}
+	if err := start(name); err != nil {
+		return fmt.Errorf("start tunnel %q: %w", name, err)
+	}
+	return nil
+}
+
 // IsTrayRunning checks if the tray daemon process is alive.
 // It also cleans up stale PID files for dead processes.
 func IsTrayRunning() bool {

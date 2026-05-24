@@ -501,6 +501,21 @@ var tunnelStopCmd = &cobra.Command{
 	},
 }
 
+var tunnelRestartCmd = &cobra.Command{
+	Use:   "tunnel-restart <name>",
+	Short: "Restart a tunnel",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		name := args[0]
+		if tunnelmgr.IsRunning(name) {
+			if err := tunnelmgr.StopDaemon(name); err != nil {
+				return err
+			}
+		}
+		return tunnelStartCmd.RunE(cmd, args)
+	},
+}
+
 var tunnelListCmd = &cobra.Command{
 	Use:   "tunnel-list",
 	Short: "List all tunnels",
@@ -549,7 +564,7 @@ func init() {
 		connectCmd, testCmd,
 		importSSHConfigCmd,
 		addTunnelCmd, removeTunnelCmd,
-		tunnelStartCmd, tunnelStopCmd, tunnelListCmd,
+		tunnelStartCmd, tunnelStopCmd, tunnelRestartCmd, tunnelListCmd,
 		guiCmd, versionCmd,
 		tunnelDaemonCmd, trayDaemonCmd,
 	)

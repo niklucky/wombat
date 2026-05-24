@@ -315,6 +315,34 @@ func TestTunnelStartCmd_requiresExactlyOneArg(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
+// tunnel-restart command
+// ---------------------------------------------------------------------------
+
+func TestTunnelRestartCmd_requiresExactlyOneArg(t *testing.T) {
+	setupTempHome(t)
+
+	var err error
+	rootCmd.SetArgs([]string{"tunnel-restart"})
+	runWithSilence(func() { err = rootCmd.Execute() })
+
+	if err == nil {
+		t.Error("expected error when tunnel-restart called with no arguments")
+	}
+}
+
+func TestTunnelRestartCmd_unknownTunnelReturnsError(t *testing.T) {
+	setupTempHome(t)
+
+	var err error
+	rootCmd.SetArgs([]string{"tunnel-restart", "nonexistent-tunnel"})
+	runWithSilence(func() { err = rootCmd.Execute() })
+
+	if err == nil {
+		t.Fatal("expected error when restarting an unknown tunnel")
+	}
+}
+
+// ---------------------------------------------------------------------------
 // tunnel-daemon command
 // ---------------------------------------------------------------------------
 
