@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"testing"
 )
@@ -42,11 +43,19 @@ func TestRestartTunnel_runningStopsThenStarts(t *testing.T) {
 	setupTempHome(t)
 
 	// Spawn a child process that we can safely stop.
+	if runtime.GOOS == "windows" {
+		t.Skip("skipping: sleep binary is not portable on Windows")
+	}
 	cmd := exec.Command("sleep", "30")
 	if err := cmd.Start(); err != nil {
 		t.Skip("cannot spawn test process:", err)
 	}
-	defer cmd.Process.Kill()
+	defer func() {
+		if err := cmd.Process.Kill(); err != nil && !errors.Is(err, os.ErrProcessDone) {
+			t.Logf("failed to kill test process: %v", err)
+		}
+		_ = cmd.Wait()
+	}()
 
 	// Write its PID to the tunnel PID file.
 	pidDir, err := PidDir()

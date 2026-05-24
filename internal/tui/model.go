@@ -17,17 +17,17 @@ import (
 
 // Model is the root Bubble Tea model.
 type Model struct {
-	config          core.Config
-	activeTab       string
-	view            string
+	config    core.Config
+	activeTab string
+	view      string
 
-	tunnelTable     table.Model
-	hostTable       table.Model
+	tunnelTable table.Model
+	hostTable   table.Model
 
-	formInputs      []textinput.Model
-	formFocus       int
-	formIsCreate    bool
-	editingTunnel   *core.Tunnel
+	formInputs    []textinput.Model
+	formFocus     int
+	formIsCreate  bool
+	editingTunnel *core.Tunnel
 
 	confirmItem     string
 	SelectedHost    *core.Host
@@ -263,7 +263,7 @@ func (m *Model) restartSelectedTunnel() {
 		}
 		cmd := exec.Command(exe, "tunnel-start", name)
 		cmd.SysProcAttr = platform.DaemonSysProcAttr()
-		return cmd.Start()
+		return cmd.Run()
 	}
 	if err := tunnelmgr.RestartTunnel(t.Name, start); err != nil {
 		notify.Alert("Wombat", fmt.Sprintf("Failed to restart %s: %v", t.Name, err))
