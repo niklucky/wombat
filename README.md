@@ -2,14 +2,13 @@
 
 ![Wombat](assets/app-icon-128.png)
 
-A cross-platform SSH helper built with Go. Features a Terminal UI (TUI), system tray application, desktop notifications, and an optional GUI (under development).
+A cross-platform SSH helper built with Go. Features a Terminal UI (TUI), system tray application, and desktop notifications.
 
 ## Features
 
 - **TUI** — Navigate and manage SSH hosts, keys, and tunnels with a keyboard-driven Bubble Tea interface.
 - **System Tray** — Keep Wombat running in the background with quick access via the tray icon.
 - **Notifications** — Get notified about connection events and tunnel status changes.
-- **GUI** *(optional)* — A Fyne-based desktop interface, available when built with the `gui` tag.
 - **CLI** — Direct commands for scripting and automation.
 
 ## Quick Start
@@ -27,9 +26,6 @@ make build
 # List configured hosts
 ./wombat list
 
-# Build with GUI support
-make build-gui
-./wombat-gui gui
 ```
 
 ## CLI Commands
@@ -65,7 +61,6 @@ make build-gui
 |---------|-------------|
 | `wombat` | Launch the TUI (and optional tray daemon) |
 | `wombat tray` | Launch the system tray app |
-| `wombat gui` | Launch the GUI *(requires `-tags gui` build)* |
 | `wombat version` | Print version information |
 
 ## Project Structure
@@ -80,7 +75,7 @@ wombat/
 │   ├── notify/        # Desktop notifications
 │   ├── tui/           # Bubble Tea TUI
 │   ├── tray/          # System tray app
-│   └── gui/           # Fyne GUI (tagged build)
+│   └── tunnelmgr/     # Tunnel management
 ├── assets/            # Icons and static assets
 └── scripts/           # Build scripts
 ```

@@ -52,7 +52,7 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: ${{ matrix.goos == 'darwin' && '1' || '0' }}
+          CGO_ENABLED: 0
         run: |
           mkdir -p dist
           ldflags="-s -w"

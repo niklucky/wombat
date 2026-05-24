@@ -22,7 +22,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "wombat",
 	Short: "Wombat — a cross-platform SSH helper",
-	Long:  `Wombat is a cross-platform SSH helper with TUI, system tray, and optional GUI.`,
+	Long:  `Wombat is a cross-platform SSH helper with TUI and system tray.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Default: start TUI + tray
 		if err := sshconfig.EnsureSetup(); err != nil {
@@ -536,14 +536,6 @@ var tunnelListCmd = &cobra.Command{
 	},
 }
 
-var guiCmd = &cobra.Command{
-	Use:   "gui",
-	Short: "Launch the GUI (requires -tags gui build)",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return runGUI()
-	},
-}
-
 var version = "dev"
 
 var versionCmd = &cobra.Command{
@@ -555,7 +547,7 @@ var versionCmd = &cobra.Command{
 }
 
 // init registers CLI subcommands on rootCmd and configures flags for host and tunnel creation.
-// It attaches commands for host management, tunnel management, GUI/version display, and background daemons,
+// It attaches commands for host management, tunnel management, version display, and background daemons,
 // and marks required flags for add-host (`address`, `user`) and add-tunnel (`host`, `local-port`, `remote-port`).
 func init() {
 	rootCmd.AddCommand(
@@ -565,7 +557,7 @@ func init() {
 		importSSHConfigCmd,
 		addTunnelCmd, removeTunnelCmd,
 		tunnelStartCmd, tunnelStopCmd, tunnelRestartCmd, tunnelListCmd,
-		guiCmd, versionCmd,
+		versionCmd,
 		tunnelDaemonCmd, trayDaemonCmd,
 	)
 
