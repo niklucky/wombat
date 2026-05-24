@@ -102,7 +102,7 @@ func (m *Model) activeTable() *table.Model {
 func (m *Model) renderTableView() string {
 	// Title
 	s := titleStyle.Render("  Wombat SSH Helper") + "\n"
-	s += subtitleStyle.Render("  Cross-platform SSH helper with TUI, tray, and optional GUI") + "\n\n"
+	s += subtitleStyle.Render("  Cross-platform SSH helper with TUI and system tray") + "\n\n"
 
 	// Actions bar
 	s += "  Actions: "
