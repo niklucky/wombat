@@ -365,23 +365,6 @@ func TestConnectCmd_requiresExactlyOneArg(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// gui command
-// ---------------------------------------------------------------------------
-
-func TestGuiCmd_defaultBuildReturnsError(t *testing.T) {
-	var err error
-	rootCmd.SetArgs([]string{"gui"})
-	runWithSilence(func() { err = rootCmd.Execute() })
-
-	// Under the default (non-gui) build, runGUI() returns an error about
-	// the missing gui build tag.  If the binary was built with -tags gui
-	// this test is skipped rather than failing.
-	if err == nil {
-		t.Skip("gui build tag active, skipping no-gui error assertion")
-	}
-}
-
-// ---------------------------------------------------------------------------
 // Port default value in list output (regression)
 // ---------------------------------------------------------------------------
 

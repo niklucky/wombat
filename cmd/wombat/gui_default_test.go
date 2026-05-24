@@ -34,3 +34,12 @@ func TestRunGUI_errorContainsBuildInstructions(t *testing.T) {
 		t.Errorf("expected error %q, got: %q", want, err.Error())
 	}
 }
+
+func TestGuiCmd_defaultBuildReturnsError(t *testing.T) {
+	var err error
+	rootCmd.SetArgs([]string{"gui"})
+	runWithSilence(func() { err = rootCmd.Execute() })
+	if err == nil {
+		t.Fatal("expected error when gui command run without -tags gui")
+	}
+}
