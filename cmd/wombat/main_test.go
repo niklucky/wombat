@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -342,6 +344,12 @@ func TestTunnelRestartCmd_unknownTunnelReturnsError(t *testing.T) {
 
 	if err == nil {
 		t.Fatal("expected error when restarting an unknown tunnel")
+	}
+
+	// On Windows, spawned processes may hold log file handles briefly after exiting.
+	// Allow time for the handle to be released before t.TempDir() cleanup runs.
+	if runtime.GOOS == "windows" {
+		time.Sleep(500 * time.Millisecond)
 	}
 }
 
