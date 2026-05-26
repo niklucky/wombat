@@ -516,6 +516,37 @@ var tunnelRestartCmd = &cobra.Command{
 	},
 }
 
+var tuiCmd = &cobra.Command{
+	Use:   "tui",
+	Short: "Launch the TUI",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := sshconfig.EnsureSetup(); err != nil {
+			return err
+		}
+		cfg := core.DefaultConfig()
+		if err := cfg.Load(); err != nil {
+			return err
+		}
+
+		editTunnelName, _ := cmd.Flags().GetString("edit-tunnel")
+		p := tea.NewProgram(tui.NewModelWithEdit(cfg, editTunnelName), tea.WithAltScreen())
+		finalModel, err := p.Run()
+		if err != nil {
+			return err
+		}
+		if m, ok := finalModel.(tui.Model); ok {
+			if m.RestartRequired {
+				fmt.Println("App home changed. Please restart Wombat.")
+				return nil
+			}
+			if m.SelectedHost != nil {
+				return execSSH(*m.SelectedHost)
+			}
+		}
+		return nil
+	},
+}
+
 var tunnelListCmd = &cobra.Command{
 	Use:   "tunnel-list",
 	Short: "List all tunnels",
@@ -559,6 +590,7 @@ func init() {
 		tunnelStartCmd, tunnelStopCmd, tunnelRestartCmd, tunnelListCmd,
 		versionCmd,
 		tunnelDaemonCmd, trayDaemonCmd,
+		tuiCmd,
 	)
 
 	addHostCmd.Flags().String("address", "", "Host address (required)")
@@ -575,6 +607,8 @@ func init() {
 	_ = addTunnelCmd.MarkFlagRequired("host")
 	_ = addTunnelCmd.MarkFlagRequired("local-port")
 	_ = addTunnelCmd.MarkFlagRequired("remote-port")
+
+	tuiCmd.Flags().String("edit-tunnel", "", "Open TUI directly to the edit form for the named tunnel")
 }
 
 // main executes the root Cobra command for the wombat CLI.

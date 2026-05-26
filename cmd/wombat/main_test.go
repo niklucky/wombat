@@ -406,6 +406,33 @@ func TestConnectCmd_requiresExactlyOneArg(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
+// tui command
+// ---------------------------------------------------------------------------
+
+func TestTuiCmd_isRegistered(t *testing.T) {
+	found := false
+	for _, c := range rootCmd.Commands() {
+		if c.Name() == "tui" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("expected 'tui' command to be registered on rootCmd")
+	}
+}
+
+func TestTuiCmd_hasEditTunnelFlag(t *testing.T) {
+	f := tuiCmd.Flags().Lookup("edit-tunnel")
+	if f == nil {
+		t.Fatal("expected --edit-tunnel flag on tui command")
+	}
+	if f.DefValue != "" {
+		t.Errorf("expected default value %q, got %q", "", f.DefValue)
+	}
+}
+
+// ---------------------------------------------------------------------------
 // Port default value in list output (regression)
 // ---------------------------------------------------------------------------
 
