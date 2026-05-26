@@ -60,7 +60,7 @@ make build
 | Command | Description |
 |---------|-------------|
 | `wombat` | Launch the TUI (and optional tray daemon) |
-| `wombat tray` | Launch the system tray app |
+| `wombat tray-daemon` | Launch the system tray app |
 | `wombat version` | Print version information |
 
 ## Project Structure

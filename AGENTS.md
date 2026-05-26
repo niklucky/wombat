@@ -16,7 +16,7 @@
 
 - CLI: `github.com/spf13/cobra`
 - TUI: `github.com/charmbracelet/bubbletea`, `lipgloss`, `bubbles`
-- Tray: `github.com/getlantern/systray`
+- Tray: `github.com/gogpu/systray` (zero CGO)
 - Notifications: `github.com/gen2brain/beeep`
 - SSH: `golang.org/x/crypto/ssh`
 
@@ -24,4 +24,4 @@
 
 1. `make build` should produce a runnable `wombat` binary.
 2. `wombat tui` should show a host list (or "No hosts configured").
-3. `wombat tray` should show a tray icon with a menu.
+3. `wombat tray-daemon` should show a tray icon with a menu.

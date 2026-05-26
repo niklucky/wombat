@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -60,13 +61,28 @@ func NewModelWithEdit(cfg core.Config, editTunnelName string) Model {
 	return m
 }
 
+// refreshTickMsg triggers a background refresh of tunnel rows.
+type refreshTickMsg time.Time
+
+func (m Model) refreshTickCmd() tea.Cmd {
+	return tea.Tick(3*time.Second, func(t time.Time) tea.Msg {
+		return refreshTickMsg(t)
+	})
+}
+
 // Init implements tea.Model.
 func (m Model) Init() tea.Cmd {
-	return nil
+	return m.refreshTickCmd()
 }
 
 // Update implements tea.Model.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg.(type) {
+	case refreshTickMsg:
+		m.refreshTunnelRows()
+		return m, m.refreshTickCmd()
+	}
+
 	switch m.view {
 	case "tunnel_form":
 		return m.formUpdate(msg)

@@ -15,7 +15,7 @@ run-tui:
 	go run $(MAIN) tui
 
 run-tray:
-	go run $(MAIN) tray
+	go run $(MAIN) tray-daemon
 
 clean:
 	rm -f $(BINARY)

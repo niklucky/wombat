@@ -1,158 +1,146 @@
 package tray
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
-	"context"
 
-	"fyne.io/systray"
+	"github.com/gogpu/systray"
 	"github.com/niklucky/wombat/internal/core"
 	"github.com/niklucky/wombat/internal/notify"
 	"github.com/niklucky/wombat/internal/tunnelmgr"
 )
 
-// tunnelMenu holds the menu items for a single tunnel.
-type tunnelMenu struct {
-	item      *systray.MenuItem
-	startStop *systray.MenuItem
-	restart   *systray.MenuItem
-	openLogs  *systray.MenuItem
-	edit      *systray.MenuItem
-}
-
 // RunWithTunnels starts the system tray application with tunnel support.
 func RunWithTunnels(cfg core.Config) {
-	systray.Run(func() { onReady(cfg) }, onExit)
-}
+	var iconData []byte
+	if data, err := os.ReadFile("assets/tray-icon.png"); err == nil {
+		iconData = data
+	}
 
-func onReady(cfg core.Config) {
+	tray := systray.New()
+	if iconData != nil {
+		tray.SetIcon(iconData)
+	}
+
+	var refresh func()
+	refresh = func() {
+		tray.SetMenu(buildMenu(tray, cfg, refresh))
+		updateTooltip(tray, cfg)
+	}
+
+	refresh()
+	tray.Show()
+
 	_ = tunnelmgr.WriteTrayPidFile()
 
-	if data, err := os.ReadFile("assets/tray-icon.png"); err == nil {
-		systray.SetIcon(data)
-	}
-
-	updateTrayStatus(cfg)
-
-	// Create a top-level menu item for each tunnel with a submenu
-	tunnelMenus := make(map[string]*tunnelMenu)
-	for _, t := range cfg.Tunnels {
-		tm := &tunnelMenu{}
-		tm.item = systray.AddMenuItem(
-			tunnelLabel(t.Name, false, ""),
-			fmt.Sprintf("Tunnel %s", t.Name),
-		)
-		tm.startStop = tm.item.AddSubMenuItem("Start", "Start or stop tunnel")
-		tm.restart = tm.item.AddSubMenuItem("Restart", "Restart tunnel")
-		tm.openLogs = tm.item.AddSubMenuItem("Open logs", "Open tunnel log file")
-		tm.edit = tm.item.AddSubMenuItem("Edit", "Edit tunnel in TUI")
-		tunnelMenus[t.Name] = tm
-	}
-
-	systray.AddSeparator()
-	mOpenApp := systray.AddMenuItem("Open app", "Open Wombat TUI")
-	mNotify := systray.AddMenuItem("Test Notification", "Send a test notification")
-	systray.AddSeparator()
-	mQuit := systray.AddMenuItem("Quit", "Quit Wombat")
-
-	// Start ticker to update titles and tunnel menu labels
+	// Start ticker to refresh tooltip and rebuild menu when state changes
 	go func() {
 		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()
-		for {
-			<-ticker.C
-			updateTrayStatus(cfg)
-			updateTunnelMenuLabels(cfg, tunnelMenus)
+		for range ticker.C {
+			refresh()
 		}
 	}()
 
-	// Initial label update so emojis reflect current state immediately
-	updateTunnelMenuLabels(cfg, tunnelMenus)
-
-	go func() {
-		for {
-			select {
-			case <-mOpenApp.ClickedCh:
-				launchTUI("")
-			case <-mNotify.ClickedCh:
-				notify.Notify("Wombat", "Hello from the tray!")
-			case <-mQuit.ClickedCh:
-				active := activeTunnels(cfg)
-				if len(active) > 0 {
-					msg := fmt.Sprintf("Stop %d active tunnel(s) before quitting?", len(active))
-					if askYesNo("Wombat", msg) {
-						for _, name := range active {
-							_ = tunnelmgr.StopDaemon(name)
-							_ = tunnelmgr.RemoveLogFile(name)
-						}
-					}
-				}
-				systray.Quit()
-				return
-			}
-		}
-	}()
-
-	// Handle tunnel start/stop, restart, and open logs clicks
-	for name, tm := range tunnelMenus {
-		go func(n string, menu *tunnelMenu) {
-			for range menu.startStop.ClickedCh {
-				toggleTunnel(cfg, n, tunnelMenus)
-			}
-		}(name, tm)
-
-		go func(n string, menu *tunnelMenu) {
-			for range menu.restart.ClickedCh {
-				restartTunnel(cfg, n, tunnelMenus)
-			}
-		}(name, tm)
-
-		go func(n string, menu *tunnelMenu) {
-			for range menu.openLogs.ClickedCh {
-				openTunnelLog(n)
-			}
-		}(name, tm)
-
-		go func(n string, menu *tunnelMenu) {
-			for range menu.edit.ClickedCh {
-				launchTUI(n)
-			}
-		}(name, tm)
+	if err := tray.Run(); err != nil {
+		// Silent on run exit
 	}
+	_ = tunnelmgr.RemoveTrayPidFile()
 }
 
-func toggleTunnel(cfg core.Config, name string, menus map[string]*tunnelMenu) {
+func buildMenu(tray *systray.SystemTray, cfg core.Config, refresh func()) *systray.Menu {
+	menu := systray.NewMenu()
+
+	for _, t := range cfg.Tunnels {
+		name := t.Name
+		running := tunnelmgr.IsRunning(name)
+		elapsed := ""
+		if running {
+			elapsed = tunnelElapsed(name)
+		}
+
+		label := tunnelLabel(name, running, elapsed)
+		submenu := systray.NewMenu()
+
+		actionLabel := "Start"
+		if running {
+			actionLabel = "Stop"
+		}
+
+		submenu.Add(actionLabel, func() {
+			toggleTunnel(tray, cfg, name, refresh)
+		})
+		submenu.Add("Restart", func() {
+			restartTunnel(tray, cfg, name, refresh)
+		})
+		submenu.Add("Open logs", func() {
+			openTunnelLog(tray, name)
+		})
+		submenu.Add("Edit", func() {
+			launchTUI(tray, name)
+		})
+
+		menu.AddSubmenu(label, submenu)
+	}
+
+	menu.AddSeparator()
+	menu.Add("Open app", func() {
+		launchTUI(tray, "")
+	})
+	menu.Add("Test Notification", func() {
+		_ = notify.Notify("Wombat", "Hello from the tray!")
+	})
+	menu.AddSeparator()
+	menu.Add("Quit", func() {
+		active := activeTunnels(cfg)
+		if len(active) > 0 {
+			msg := fmt.Sprintf("Stop %d active tunnel(s) before quitting?", len(active))
+			if askYesNo("Wombat", msg) {
+				for _, n := range active {
+					_ = tunnelmgr.StopDaemon(n)
+					_ = tunnelmgr.RemoveLogFile(n)
+				}
+			}
+		}
+		_ = tunnelmgr.RemoveTrayPidFile()
+		tray.Remove()
+		os.Exit(0)
+	})
+
+	return menu
+}
+
+func toggleTunnel(tray *systray.SystemTray, cfg core.Config, name string, refresh func()) {
 	running := tunnelmgr.IsRunning(name)
 	if running {
 		if err := tunnelmgr.StopDaemon(name); err == nil {
 			_ = tunnelmgr.RemoveLogFile(name)
-			notify.Alert("Wombat", fmt.Sprintf("Tunnel %s stopped", name))
-			updateTrayStatus(cfg)
-			updateTunnelMenuLabels(cfg, menus)
+			_ = notify.Notify("Wombat", fmt.Sprintf("Tunnel %s stopped", name))
+			refresh()
 		}
 	} else {
 		if err := startTunnelProcess(name); err != nil {
-			notify.Alert("Wombat", fmt.Sprintf("Failed to start tunnel %s: %v", name, err))
+			_ = notify.Alert("Wombat", fmt.Sprintf("Failed to start tunnel %s: %v", name, err))
 		} else {
-			notify.Notify("Wombat", fmt.Sprintf("Tunnel %s started", name))
-			updateTrayStatus(cfg)
-			updateTunnelMenuLabels(cfg, menus)
+			_ = notify.Notify("Wombat", fmt.Sprintf("Tunnel %s started", name))
+			refresh()
 		}
 	}
 }
 
-func restartTunnel(cfg core.Config, name string, menus map[string]*tunnelMenu) {
+func restartTunnel(tray *systray.SystemTray, cfg core.Config, name string, refresh func()) {
 	if err := tunnelmgr.RestartTunnel(name, startTunnelProcess); err != nil {
-		notify.Alert("Wombat", fmt.Sprintf("Failed to restart tunnel %s: %v", name, err))
+		_ = notify.Alert("Wombat", fmt.Sprintf("Failed to restart tunnel %s: %v", name, err))
 	} else {
-		notify.Notify("Wombat", fmt.Sprintf("Tunnel %s restarted", name))
-		updateTrayStatus(cfg)
-		updateTunnelMenuLabels(cfg, menus)
+		_ = notify.Notify("Wombat", fmt.Sprintf("Tunnel %s restarted", name))
+		refresh()
 	}
 }
 
@@ -165,44 +153,17 @@ func startTunnelProcess(name string) error {
 	return cmd.Run()
 }
 
-func onExit() {
-	_ = tunnelmgr.RemoveTrayPidFile()
-}
-
-func updateTrayStatus(cfg core.Config) {
+func updateTooltip(tray *systray.SystemTray, cfg core.Config) {
 	active := activeTunnels(cfg)
 	count := len(active)
 
 	if count == 0 {
-		systray.SetTitle("")
-		systray.SetTooltip("Wombat SSH Helper")
+		tray.SetTooltip("Wombat SSH Helper")
 	} else if count == 1 {
 		elapsed := tunnelElapsed(active[0])
-		systray.SetTitle(elapsed)
-		systray.SetTooltip(fmt.Sprintf("%s active", active[0]))
+		tray.SetTooltip(fmt.Sprintf("%s active (%s)", active[0], elapsed))
 	} else {
-		systray.SetTitle(fmt.Sprintf("%d", count))
-		systray.SetTooltip(fmt.Sprintf("%d tunnels active", count))
-	}
-}
-
-func updateTunnelMenuLabels(cfg core.Config, menus map[string]*tunnelMenu) {
-	for _, t := range cfg.Tunnels {
-		menu, ok := menus[t.Name]
-		if !ok {
-			continue
-		}
-		running := tunnelmgr.IsRunning(t.Name)
-		elapsed := ""
-		if running {
-			elapsed = tunnelElapsed(t.Name)
-		}
-		menu.item.SetTitle(tunnelLabel(t.Name, running, elapsed))
-		if running {
-			menu.startStop.SetTitle("Stop")
-		} else {
-			menu.startStop.SetTitle("Start")
-		}
+		tray.SetTooltip(fmt.Sprintf("%d tunnels active", count))
 	}
 }
 
@@ -248,29 +209,30 @@ func tunnelElapsed(name string) string {
 	return fmt.Sprintf("%02d:%02d", mins, secs)
 }
 
-func openTunnelLog(name string) {
+func openTunnelLog(tray *systray.SystemTray, name string) {
 	path, err := tunnelmgr.LogFilePath(name)
 	if err != nil {
-		notify.Alert("Wombat", fmt.Sprintf("Failed to get log path: %v", err))
+		_ = notify.Alert("Wombat", fmt.Sprintf("Failed to get log path: %v", err))
 		return
 	}
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		notify.Alert("Wombat", fmt.Sprintf("No logs for tunnel %s yet", name))
+		_ = notify.Alert("Wombat", fmt.Sprintf("No logs for tunnel %s yet", name))
 		return
 	}
 	if err := openFile(path); err != nil {
-		notify.Alert("Wombat", fmt.Sprintf("Failed to open log: %v", err))
+		_ = notify.Alert("Wombat", fmt.Sprintf("Failed to open log: %v", err))
 	}
 }
 
 // launchTUI starts the wombat TUI in a new terminal process.
 // If editTunnel is non-empty it opens directly to that tunnel's edit form.
-func launchTUI(editTunnel string) {
+func launchTUI(tray *systray.SystemTray, editTunnel string) {
 	ctx := context.Background()
 	exe, err := os.Executable()
 	if err != nil {
 		exe, err = exec.LookPath("wombat")
 		if err != nil {
+			log.Printf("launchTUI: could not locate wombat binary")
 			_ = notify.Alert("Wombat", "Could not locate wombat binary. Please place it in a directory listed in your PATH.")
 			return
 		}
@@ -279,9 +241,55 @@ func launchTUI(editTunnel string) {
 	if editTunnel != "" {
 		args = append(args, "--edit-tunnel", editTunnel)
 	}
-	cmd := exec.CommandContext(ctx, exe, args...)
-	if err := cmd.Start(); err != nil {
-		_ = notify.Alert("Wombat", fmt.Sprintf("Failed to open TUI: %v", err))
+
+	switch runtime.GOOS {
+	case "darwin":
+		cmdStr := fmt.Sprintf("%s %s", exe, strings.Join(args, " "))
+		script := fmt.Sprintf(`tell application "Terminal" to do script %q`, cmdStr)
+		if err := exec.CommandContext(ctx, "osascript", "-e", script).Start(); err != nil {
+			log.Printf("launchTUI: failed to open Terminal: %v", err)
+			_ = notify.Alert("Wombat", fmt.Sprintf("Failed to open Terminal: %v", err))
+			return
+		}
+		_ = exec.CommandContext(ctx, "osascript", "-e", `tell application "Terminal" to activate`).Start()
+	case "linux":
+		terminals := []string{"x-terminal-emulator", "gnome-terminal", "kgx", "konsole", "xfce4-terminal", "xterm"}
+		for _, term := range terminals {
+			path, err := exec.LookPath(term)
+			if err != nil {
+				continue
+			}
+			var cmd *exec.Cmd
+			switch term {
+			case "gnome-terminal", "kgx":
+				gtArgs := append([]string{"--", exe}, args...)
+				cmd = exec.CommandContext(ctx, path, gtArgs...)
+			default:
+				termArgs := append([]string{"-e", exe}, args...)
+				cmd = exec.CommandContext(ctx, path, termArgs...)
+			}
+			if err := cmd.Start(); err == nil {
+				return
+			}
+		}
+		// Fallback: spawn in background (may not have a visible terminal)
+		cmd := exec.CommandContext(ctx, exe, args...)
+		if err := cmd.Start(); err != nil {
+			log.Printf("launchTUI: failed to start TUI: %v", err)
+			_ = notify.Alert("Wombat", fmt.Sprintf("Failed to open TUI: %v", err))
+		}
+	case "windows":
+		cmd := exec.CommandContext(ctx, "cmd", append([]string{"/c", "start", "", exe}, args...)...)
+		if err := cmd.Start(); err != nil {
+			log.Printf("launchTUI: failed to start TUI: %v", err)
+			_ = notify.Alert("Wombat", fmt.Sprintf("Failed to open TUI: %v", err))
+		}
+	default:
+		cmd := exec.CommandContext(ctx, exe, args...)
+		if err := cmd.Start(); err != nil {
+			log.Printf("launchTUI: failed to start TUI: %v", err)
+			_ = notify.Alert("Wombat", fmt.Sprintf("Failed to open TUI: %v", err))
+		}
 	}
 }
 
