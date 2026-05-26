@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strings"
 	"time"
+	"context"
 
 	"fyne.io/systray"
 	"github.com/niklucky/wombat/internal/core"
@@ -265,6 +266,7 @@ func openTunnelLog(name string) {
 // launchTUI starts the wombat TUI in a new terminal process.
 // If editTunnel is non-empty it opens directly to that tunnel's edit form.
 func launchTUI(editTunnel string) {
+	ctx := context.Background()
 	exe, err := os.Executable()
 	if err != nil {
 		exe, err = exec.LookPath("wombat")
@@ -277,7 +279,7 @@ func launchTUI(editTunnel string) {
 	if editTunnel != "" {
 		args = append(args, "--edit-tunnel", editTunnel)
 	}
-	cmd := exec.Command(exe, args...)
+	cmd := exec.CommandContext(ctx, exe, args...)
 	if err := cmd.Start(); err != nil {
 		_ = notify.Alert("Wombat", fmt.Sprintf("Failed to open TUI: %v", err))
 	}

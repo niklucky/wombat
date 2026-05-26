@@ -52,7 +52,7 @@ func NewModelWithEdit(cfg core.Config, editTunnelName string) Model {
 		for i, t := range cfg.Tunnels {
 			if t.Name == editTunnelName {
 				m.tunnelTable.SetCursor(i)
-				m.initForm(false, &t)
+				m.initForm(false, &cfg.Tunnels[i])
 				break
 			}
 		}
