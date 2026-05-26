@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strings"
 	"time"
+	"context"
 
 	"fyne.io/systray"
 	"github.com/niklucky/wombat/internal/core"
@@ -21,6 +22,7 @@ type tunnelMenu struct {
 	startStop *systray.MenuItem
 	restart   *systray.MenuItem
 	openLogs  *systray.MenuItem
+	edit      *systray.MenuItem
 }
 
 // RunWithTunnels starts the system tray application with tunnel support.
@@ -48,10 +50,12 @@ func onReady(cfg core.Config) {
 		tm.startStop = tm.item.AddSubMenuItem("Start", "Start or stop tunnel")
 		tm.restart = tm.item.AddSubMenuItem("Restart", "Restart tunnel")
 		tm.openLogs = tm.item.AddSubMenuItem("Open logs", "Open tunnel log file")
+		tm.edit = tm.item.AddSubMenuItem("Edit", "Edit tunnel in TUI")
 		tunnelMenus[t.Name] = tm
 	}
 
 	systray.AddSeparator()
+	mOpenApp := systray.AddMenuItem("Open app", "Open Wombat TUI")
 	mNotify := systray.AddMenuItem("Test Notification", "Send a test notification")
 	systray.AddSeparator()
 	mQuit := systray.AddMenuItem("Quit", "Quit Wombat")
@@ -73,6 +77,8 @@ func onReady(cfg core.Config) {
 	go func() {
 		for {
 			select {
+			case <-mOpenApp.ClickedCh:
+				launchTUI("")
 			case <-mNotify.ClickedCh:
 				notify.Notify("Wombat", "Hello from the tray!")
 			case <-mQuit.ClickedCh:
@@ -109,6 +115,12 @@ func onReady(cfg core.Config) {
 		go func(n string, menu *tunnelMenu) {
 			for range menu.openLogs.ClickedCh {
 				openTunnelLog(n)
+			}
+		}(name, tm)
+
+		go func(n string, menu *tunnelMenu) {
+			for range menu.edit.ClickedCh {
+				launchTUI(n)
 			}
 		}(name, tm)
 	}
@@ -248,6 +260,28 @@ func openTunnelLog(name string) {
 	}
 	if err := openFile(path); err != nil {
 		notify.Alert("Wombat", fmt.Sprintf("Failed to open log: %v", err))
+	}
+}
+
+// launchTUI starts the wombat TUI in a new terminal process.
+// If editTunnel is non-empty it opens directly to that tunnel's edit form.
+func launchTUI(editTunnel string) {
+	ctx := context.Background()
+	exe, err := os.Executable()
+	if err != nil {
+		exe, err = exec.LookPath("wombat")
+		if err != nil {
+			_ = notify.Alert("Wombat", "Could not locate wombat binary. Please place it in a directory listed in your PATH.")
+			return
+		}
+	}
+	args := []string{"tui"}
+	if editTunnel != "" {
+		args = append(args, "--edit-tunnel", editTunnel)
+	}
+	cmd := exec.CommandContext(ctx, exe, args...)
+	if err := cmd.Start(); err != nil {
+		_ = notify.Alert("Wombat", fmt.Sprintf("Failed to open TUI: %v", err))
 	}
 }
 

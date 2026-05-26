@@ -36,12 +36,27 @@ type Model struct {
 
 // NewModel creates a new TUI model with the given config.
 func NewModel(cfg core.Config) Model {
+	return NewModelWithEdit(cfg, "")
+}
+
+// NewModelWithEdit creates a new TUI model and, if editTunnelName is non-empty
+// and the tunnel exists, opens directly into its edit form.
+func NewModelWithEdit(cfg core.Config, editTunnelName string) Model {
 	m := Model{
 		config:    cfg,
 		activeTab: "tunnels",
 		view:      "table",
 	}
 	m.initTables()
+	if editTunnelName != "" {
+		for i, t := range cfg.Tunnels {
+			if t.Name == editTunnelName {
+				m.tunnelTable.SetCursor(i)
+				m.initForm(false, &cfg.Tunnels[i])
+				break
+			}
+		}
+	}
 	return m
 }
 
