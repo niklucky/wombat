@@ -33,18 +33,12 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		// Start tray daemon in background process (only if enabled and not already running)
-		if cfg.OpenTray && !tunnelmgr.IsTrayRunning() {
-			exe, err := os.Executable()
-			if err != nil {
-				log.Printf("failed to locate executable for tray-daemon: %v", err)
-			} else {
-				trayDaemon := exec.Command(exe, "tray-daemon")
-				trayDaemon.SysProcAttr = daemonSysProcAttr()
-				if startErr := trayDaemon.Start(); startErr != nil {
-					log.Printf("failed to start tray-daemon: %v", startErr)
-				}
+		// Restart tray daemon in background process (only if enabled)
+		if cfg.OpenTray {
+			if tunnelmgr.IsTrayRunning() {
+				_ = tunnelmgr.StopTrayDaemon()
 			}
+			startTrayDaemon()
 		}
 
 		// Start TUI
@@ -528,6 +522,14 @@ var tuiCmd = &cobra.Command{
 			return err
 		}
 
+		// Restart tray daemon when opening TUI
+		if cfg.OpenTray {
+			if tunnelmgr.IsTrayRunning() {
+				_ = tunnelmgr.StopTrayDaemon()
+			}
+			startTrayDaemon()
+		}
+
 		editTunnelName, _ := cmd.Flags().GetString("edit-tunnel")
 		p := tea.NewProgram(tui.NewModelWithEdit(cfg, editTunnelName), tea.WithAltScreen())
 		finalModel, err := p.Run()
@@ -575,6 +577,20 @@ var versionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("wombat %s\n", version)
 	},
+}
+
+// startTrayDaemon launches the tray-daemon subcommand in the background.
+func startTrayDaemon() {
+	exe, err := os.Executable()
+	if err != nil {
+		log.Printf("failed to locate executable for tray-daemon: %v", err)
+		return
+	}
+	trayDaemon := exec.Command(exe, "tray-daemon")
+	trayDaemon.SysProcAttr = daemonSysProcAttr()
+	if err := trayDaemon.Start(); err != nil {
+		log.Printf("failed to start tray-daemon: %v", err)
+	}
 }
 
 // init registers CLI subcommands on rootCmd and configures flags for host and tunnel creation.

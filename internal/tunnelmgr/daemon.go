@@ -183,6 +183,33 @@ func RestartTunnel(name string, start func(string) error) error {
 	return nil
 }
 
+// StopTrayDaemon sends a termination signal to the tray daemon process.
+func StopTrayDaemon() error {
+	path, err := TrayPidFilePath()
+	if err != nil {
+		return err
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("tray daemon is not running")
+	}
+	pid, err := strconv.Atoi(string(data))
+	if err != nil {
+		_ = os.Remove(path)
+		return fmt.Errorf("invalid tray PID file")
+	}
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		_ = os.Remove(path)
+		return fmt.Errorf("tray daemon process not found")
+	}
+	if err := proc.Signal(os.Interrupt); err != nil {
+		_ = proc.Signal(os.Kill)
+	}
+	_ = os.Remove(path)
+	return nil
+}
+
 // IsTrayRunning checks if the tray daemon process is alive.
 // It also cleans up stale PID files for dead processes.
 func IsTrayRunning() bool {
