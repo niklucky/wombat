@@ -50,7 +50,8 @@ func RunWithTunnels(cfg core.Config) {
 	}()
 
 	if err := tray.Run(); err != nil {
-		// Silent on run exit
+		log.Printf("tray.Run failed: %v", err)
+		_ = notify.Alert("Wombat", fmt.Sprintf("Tray failed: %v", err))
 	}
 	_ = tunnelmgr.RemoveTrayPidFile()
 }
@@ -75,16 +76,16 @@ func buildMenu(tray *systray.SystemTray, cfg core.Config, refresh func()) *systr
 		}
 
 		submenu.Add(actionLabel, func() {
-			toggleTunnel(tray, cfg, name, refresh)
+			toggleTunnel(name, refresh)
 		})
 		submenu.Add("Restart", func() {
-			restartTunnel(tray, cfg, name, refresh)
+			restartTunnel(name, refresh)
 		})
 		submenu.Add("Open logs", func() {
-			openTunnelLog(tray, name)
+			openTunnelLog(name)
 		})
 		submenu.Add("Edit", func() {
-			launchTUI(tray, name)
+			launchTUI(name)
 		})
 
 		menu.AddSubmenu(label, submenu)
@@ -92,7 +93,7 @@ func buildMenu(tray *systray.SystemTray, cfg core.Config, refresh func()) *systr
 
 	menu.AddSeparator()
 	menu.Add("Open app", func() {
-		launchTUI(tray, "")
+		launchTUI("")
 	})
 	menu.Add("Test Notification", func() {
 		_ = notify.Notify("Wombat", "Hello from the tray!")
@@ -117,13 +118,16 @@ func buildMenu(tray *systray.SystemTray, cfg core.Config, refresh func()) *systr
 	return menu
 }
 
-func toggleTunnel(tray *systray.SystemTray, cfg core.Config, name string, refresh func()) {
+func toggleTunnel(name string, refresh func()) {
 	running := tunnelmgr.IsRunning(name)
 	if running {
 		if err := tunnelmgr.StopDaemon(name); err == nil {
 			_ = tunnelmgr.RemoveLogFile(name)
 			_ = notify.Notify("Wombat", fmt.Sprintf("Tunnel %s stopped", name))
 			refresh()
+		} else {
+			log.Printf("failed to stop tunnel %s: %v", name, err)
+			_ = notify.Notify("Wombat", fmt.Sprintf("Failed to stop tunnel %s: %v", name, err))
 		}
 	} else {
 		if err := startTunnelProcess(name); err != nil {
@@ -135,7 +139,7 @@ func toggleTunnel(tray *systray.SystemTray, cfg core.Config, name string, refres
 	}
 }
 
-func restartTunnel(tray *systray.SystemTray, cfg core.Config, name string, refresh func()) {
+func restartTunnel(name string, refresh func()) {
 	if err := tunnelmgr.RestartTunnel(name, startTunnelProcess); err != nil {
 		_ = notify.Alert("Wombat", fmt.Sprintf("Failed to restart tunnel %s: %v", name, err))
 	} else {
@@ -159,12 +163,14 @@ func updateTooltip(tray *systray.SystemTray, cfg core.Config) {
 
 	if count == 0 {
 		tray.SetTooltip("Wombat SSH Helper")
-	} else if count == 1 {
+		return
+	}
+	if count == 1 {
 		elapsed := tunnelElapsed(active[0])
 		tray.SetTooltip(fmt.Sprintf("%s active (%s)", active[0], elapsed))
-	} else {
-		tray.SetTooltip(fmt.Sprintf("%d tunnels active", count))
+		return
 	}
+	tray.SetTooltip(fmt.Sprintf("%d tunnels active", count))
 }
 
 func tunnelLabel(name string, active bool, elapsed string) string {
@@ -209,7 +215,7 @@ func tunnelElapsed(name string) string {
 	return fmt.Sprintf("%02d:%02d", mins, secs)
 }
 
-func openTunnelLog(tray *systray.SystemTray, name string) {
+func openTunnelLog(name string) {
 	path, err := tunnelmgr.LogFilePath(name)
 	if err != nil {
 		_ = notify.Alert("Wombat", fmt.Sprintf("Failed to get log path: %v", err))
@@ -224,9 +230,14 @@ func openTunnelLog(tray *systray.SystemTray, name string) {
 	}
 }
 
+// shellQuote returns a single-quoted shell string literal for s.
+func shellQuote(s string) string {
+	return "'" + strings.ReplaceAll(s, "'", `'"'"'`) + "'"
+}
+
 // launchTUI starts the wombat TUI in a new terminal process.
 // If editTunnel is non-empty it opens directly to that tunnel's edit form.
-func launchTUI(tray *systray.SystemTray, editTunnel string) {
+func launchTUI(editTunnel string) {
 	ctx := context.Background()
 	exe, err := os.Executable()
 	if err != nil {
@@ -244,7 +255,11 @@ func launchTUI(tray *systray.SystemTray, editTunnel string) {
 
 	switch runtime.GOOS {
 	case "darwin":
-		cmdStr := fmt.Sprintf("%s %s", exe, strings.Join(args, " "))
+		quoted := []string{shellQuote(exe)}
+		for _, a := range args {
+			quoted = append(quoted, shellQuote(a))
+		}
+		cmdStr := strings.Join(quoted, " ")
 		script := fmt.Sprintf(`tell application "Terminal" to do script %q`, cmdStr)
 		if err := exec.CommandContext(ctx, "osascript", "-e", script).Start(); err != nil {
 			log.Printf("launchTUI: failed to open Terminal: %v", err)
