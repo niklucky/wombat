@@ -36,13 +36,17 @@ func RunWithTunnels(cfg core.Config) {
 	}
 
 	refresh()
+	// NOTE: tray.OnClick does not fire on macOS when a menu is attached
+	// because NSStatusItem suppresses the button action in favor of showing
+	// the menu. This is a platform limitation of gogpu/systray on macOS.
 	tray.Show()
 
 	_ = tunnelmgr.WriteTrayPidFile()
 
-	// Start ticker to refresh tooltip and rebuild menu when state changes
+	// Refresh tray menu periodically so tunnel state stays in sync
+	// when tunnels are started/stopped outside the tray.
 	go func() {
-		ticker := time.NewTicker(5 * time.Second)
+		ticker := time.NewTicker(3 * time.Second)
 		defer ticker.Stop()
 		for range ticker.C {
 			refresh()
