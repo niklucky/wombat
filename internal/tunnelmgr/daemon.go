@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"syscall"
+	"time"
 
 	"github.com/niklucky/wombat/internal/core"
 )
@@ -205,6 +206,17 @@ func StopTrayDaemon() error {
 	}
 	if err := proc.Signal(os.Interrupt); err != nil {
 		_ = proc.Signal(os.Kill)
+	} else {
+		for i := 0; i < 50; i++ {
+			time.Sleep(100 * time.Millisecond)
+			if proc.Signal(syscall.Signal(0)) != nil {
+				break
+			}
+		}
+		if proc.Signal(syscall.Signal(0)) == nil {
+			_ = proc.Signal(os.Kill)
+			time.Sleep(200 * time.Millisecond)
+		}
 	}
 	_ = os.Remove(path)
 	return nil

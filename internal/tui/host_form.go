@@ -76,14 +76,25 @@ func (m *Model) saveHostForm() error {
 	name := m.formInputs[0].Value()
 	address := m.formInputs[1].Value()
 	user := m.formInputs[2].Value()
-	port, _ := strconv.Atoi(m.formInputs[3].Value())
+	rawPort := m.formInputs[3].Value()
 	keyPath := m.formInputs[4].Value()
 
 	if name == "" || address == "" || user == "" {
 		return fmt.Errorf("name, address and user are required")
 	}
-	if port == 0 {
+
+	var port int
+	if rawPort == "" {
 		port = 22
+	} else {
+		p, err := strconv.Atoi(rawPort)
+		if err != nil {
+			return fmt.Errorf("invalid port: %v", err)
+		}
+		if p < 1 || p > 65535 {
+			return fmt.Errorf("port must be between 1 and 65535")
+		}
+		port = p
 	}
 
 	host := core.Host{
