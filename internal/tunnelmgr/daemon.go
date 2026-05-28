@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"syscall"
+	"time"
 
 	"github.com/niklucky/wombat/internal/core"
 )
@@ -180,6 +181,44 @@ func RestartTunnel(name string, start func(string) error) error {
 	if err := start(name); err != nil {
 		return fmt.Errorf("start tunnel %q: %w", name, err)
 	}
+	return nil
+}
+
+// StopTrayDaemon sends a termination signal to the tray daemon process.
+func StopTrayDaemon() error {
+	path, err := TrayPidFilePath()
+	if err != nil {
+		return err
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("tray daemon is not running")
+	}
+	pid, err := strconv.Atoi(string(data))
+	if err != nil {
+		_ = os.Remove(path)
+		return fmt.Errorf("invalid tray PID file")
+	}
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		_ = os.Remove(path)
+		return fmt.Errorf("tray daemon process not found")
+	}
+	if err := proc.Signal(os.Interrupt); err != nil {
+		_ = proc.Signal(os.Kill)
+	} else {
+		for i := 0; i < 50; i++ {
+			time.Sleep(100 * time.Millisecond)
+			if proc.Signal(syscall.Signal(0)) != nil {
+				break
+			}
+		}
+		if proc.Signal(syscall.Signal(0)) == nil {
+			_ = proc.Signal(os.Kill)
+			time.Sleep(200 * time.Millisecond)
+		}
+	}
+	_ = os.Remove(path)
 	return nil
 }
 

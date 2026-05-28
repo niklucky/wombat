@@ -30,7 +30,11 @@ type Model struct {
 	formIsCreate  bool
 	editingTunnel *core.Tunnel
 
+	formIsCreateHost bool
+	editingHost      *core.Host
+
 	confirmItem     string
+	confirmItemType string
 	SelectedHost    *core.Host
 	RestartRequired bool
 }
@@ -86,6 +90,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.view {
 	case "tunnel_form":
 		return m.formUpdate(msg)
+	case "host_form":
+		return m.hostFormUpdate(msg)
 	case "settings_form":
 		return m.settingsFormUpdate(msg)
 	case "confirm_delete":
@@ -100,10 +106,12 @@ func (m Model) View() string {
 	switch m.view {
 	case "tunnel_form":
 		return m.formView()
+	case "host_form":
+		return m.hostFormView()
 	case "settings_form":
 		return m.settingsFormView()
 	case "confirm_delete":
-		return renderConfirmDelete(m.confirmItem)
+		return renderConfirmDelete(m.confirmItemType, m.confirmItem)
 	default:
 		return m.renderTableView()
 	}
@@ -142,7 +150,7 @@ func (m *Model) tableUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "n":
 			if m.activeTab == "hosts" {
-				// TODO: add host form
+				m.initHostForm(true, nil)
 			}
 		case "s":
 			m.initSettingsForm()
@@ -164,14 +172,22 @@ func (m *Model) tableUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 					idx := m.hostTable.Cursor()
 					if idx < len(m.config.Hosts) {
 						h := m.config.Hosts[idx]
-						m.SelectedHost = &h
-						return m, tea.Quit
+						m.initHostForm(false, &h)
 					}
 				}
 			}
 		case "c":
 			if m.activeTab == "tunnels" {
 				m.startSelectedTunnel()
+			} else {
+				if len(m.config.Hosts) > 0 {
+					idx := m.hostTable.Cursor()
+					if idx < len(m.config.Hosts) {
+						h := m.config.Hosts[idx]
+						m.SelectedHost = &h
+						return m, tea.Quit
+					}
+				}
 			}
 		case "d":
 			if m.activeTab == "tunnels" {
@@ -187,6 +203,16 @@ func (m *Model) tableUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 					idx := m.tunnelTable.Cursor()
 					if idx < len(m.config.Tunnels) {
 						m.confirmItem = m.config.Tunnels[idx].Name
+						m.confirmItemType = "tunnel"
+						m.view = "confirm_delete"
+					}
+				}
+			} else {
+				if len(m.config.Hosts) > 0 {
+					idx := m.hostTable.Cursor()
+					if idx < len(m.config.Hosts) {
+						m.confirmItem = m.config.Hosts[idx].Name
+						m.confirmItemType = "host"
 						m.view = "confirm_delete"
 					}
 				}
@@ -205,7 +231,11 @@ func (m *Model) confirmUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "y":
-			m.config.RemoveTunnel(m.confirmItem)
+			if m.confirmItemType == "host" {
+				m.config.RemoveHost(m.confirmItem)
+			} else {
+				m.config.RemoveTunnel(m.confirmItem)
+			}
 			_ = m.config.Save()
 			m.refreshTables()
 			m.view = "table"
