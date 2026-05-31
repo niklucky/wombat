@@ -154,6 +154,7 @@ func TestStopDaemon_notRunning(t *testing.T) {
 }
 
 func TestRestartTunnel(t *testing.T) {
+	setupTempAppHome(t)
 	calls := 0
 	start := func(string) error {
 		calls++
@@ -168,6 +169,7 @@ func TestRestartTunnel(t *testing.T) {
 }
 
 func TestRestartTunnel_startFails(t *testing.T) {
+	setupTempAppHome(t)
 	start := func(string) error { return os.ErrNotExist }
 	if err := RestartTunnel("any", start); err == nil {
 		t.Error("expected error when start fails")
