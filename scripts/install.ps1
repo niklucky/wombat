@@ -57,7 +57,7 @@ try {
     Write-Host "Extracting..."
     Expand-Archive -Path $downloadPath -DestinationPath $tmpDir -Force
 
-    $installDir = Join-Path $env:LOCALAPPDATA "Programs" $binary
+    $installDir = Join-Path (Join-Path $env:LOCALAPPDATA "Programs") $binary
     New-Item -ItemType Directory -Path $installDir -Force | Out-Null
 
     $binaryPath = Join-Path $tmpDir "$binary.exe"
