@@ -65,6 +65,7 @@ func TestSaveHostForm_toggleYesSaves(t *testing.T) {
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, ".config"))
+	t.Setenv("APPDATA", filepath.Join(tmp, "AppData", "Roaming"))
 	t.Setenv("LOCALAPPDATA", filepath.Join(tmp, "AppData", "Local"))
 
 	m := Model{config: core.DefaultConfig()}

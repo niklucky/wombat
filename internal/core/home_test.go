@@ -13,6 +13,7 @@ func setTestHome(t *testing.T, tmp string) {
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, ".config"))
+	t.Setenv("APPDATA", filepath.Join(tmp, "AppData", "Roaming"))
 	t.Setenv("LOCALAPPDATA", filepath.Join(tmp, "AppData", "Local"))
 }
 
