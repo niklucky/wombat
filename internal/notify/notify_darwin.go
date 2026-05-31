@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/niklucky/wombat/assets"
 )
 
 var iconPath string
@@ -15,7 +17,7 @@ func init() {
 	// Extract icon to a temp location so terminal-notifier can reference it
 	tmpIcon := filepath.Join(os.TempDir(), "wombat-notification-icon.png")
 	if _, err := os.Stat(tmpIcon); os.IsNotExist(err) {
-		_ = os.WriteFile(tmpIcon, iconData, 0644)
+		_ = os.WriteFile(tmpIcon, assets.NotificationIcon, 0644)
 	}
 	iconPath = tmpIcon
 }

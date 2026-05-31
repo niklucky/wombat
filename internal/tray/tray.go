@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gogpu/systray"
+	"github.com/niklucky/wombat/assets"
 	"github.com/niklucky/wombat/internal/core"
 	"github.com/niklucky/wombat/internal/notify"
 	"github.com/niklucky/wombat/internal/tunnelmgr"
@@ -19,14 +20,9 @@ import (
 
 // RunWithTunnels starts the system tray application with tunnel support.
 func RunWithTunnels(cfg core.Config) {
-	var iconData []byte
-	if data, err := os.ReadFile("assets/tray-icon.png"); err == nil {
-		iconData = data
-	}
-
 	tray := systray.New()
-	if iconData != nil {
-		tray.SetIcon(iconData)
+	if assets.TrayIcon != nil {
+		tray.SetIcon(assets.TrayIcon)
 	}
 
 	var refresh func()
