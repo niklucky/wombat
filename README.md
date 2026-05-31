@@ -11,9 +11,24 @@ A cross-platform SSH helper built with Go. Features a Terminal UI (TUI), system 
 - **Notifications** — Get notified about connection events and tunnel status changes.
 - **CLI** — Direct commands for scripting and automation.
 
+## Installation
+
+### macOS / Linux
+
+```bash
+curl -LsSf https://raw.githubusercontent.com/niklucky/wombat/main/scripts/install.sh | bash
+```
+
+### Windows (PowerShell)
+
+```powershell
+Invoke-RestMethod https://raw.githubusercontent.com/niklucky/wombat/main/scripts/install.ps1 | Invoke-Expression
+```
+
+Or download pre-built binaries from the [Releases](https://github.com/niklucky/wombat/releases) page.
+
 ## Quick Start
 
-For compiled binaries, see the [Releases](https://github.com/niklucky/wombat/releases) page.
 If you want to build from source:
 
 ```bash
