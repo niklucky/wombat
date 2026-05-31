@@ -13,6 +13,10 @@ import (
 
 var iconPath string
 
+// init extracts the embedded notification icon to a temp PNG and sets the package-level
+// `iconPath` so external notifiers (e.g., terminal-notifier) can reference it.
+// If the temp file already exists it is left in place; write failures are ignored and
+// `iconPath` is set regardless.
 func init() {
 	// Extract icon to a temp location so terminal-notifier can reference it
 	tmpIcon := filepath.Join(os.TempDir(), "wombat-notification-icon.png")

@@ -18,7 +18,11 @@ import (
 	"github.com/niklucky/wombat/internal/tunnelmgr"
 )
 
-// RunWithTunnels starts the system tray application with tunnel support.
+// RunWithTunnels creates and runs the system tray UI for managing configured tunnels.
+// It uses cfg to build the tray menu and tooltip, sets the tray icon from assets when available,
+// writes a tray PID file, and starts a background ticker that refreshes the menu every 3 seconds
+// to keep tunnel state in sync. It runs the tray event loop and logs and alerts on errors.
+// When the event loop exits, the tray PID file is removed.
 func RunWithTunnels(cfg core.Config) {
 	tray := systray.New()
 	if assets.TrayIcon != nil {
