@@ -61,6 +61,15 @@ func (m *Model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.formFocus = len(m.formInputs) - 1
 			}
 			m.updateFormFocus()
+		case "enter":
+			if m.formFocus == 1 {
+				m.saveTunnelFormState()
+				m.returnView = "tunnel_form"
+				m.hostSourceCursor = 0
+				m.view = "host_source"
+				return m, nil
+			}
+			m.formInputs[m.formFocus], _ = m.formInputs[m.formFocus].Update(msg)
 		default:
 			m.formInputs[m.formFocus], _ = m.formInputs[m.formFocus].Update(msg)
 		}
@@ -76,6 +85,22 @@ func (m *Model) updateFormFocus() {
 			m.formInputs[i].Blur()
 		}
 	}
+}
+
+func (m *Model) saveTunnelFormState() {
+	m.savedFormInputs = make([]textinput.Model, len(m.formInputs))
+	copy(m.savedFormInputs, m.formInputs)
+	m.savedFormFocus = m.formFocus
+	m.savedFormIsCreate = m.formIsCreate
+	m.savedEditingTunnel = m.editingTunnel
+}
+
+func (m *Model) restoreTunnelForm() {
+	m.formInputs = m.savedFormInputs
+	m.formFocus = m.savedFormFocus
+	m.formIsCreate = m.savedFormIsCreate
+	m.editingTunnel = m.savedEditingTunnel
+	m.updateFormFocus()
 }
 
 func (m *Model) saveForm() error {
@@ -131,6 +156,10 @@ func (m *Model) formView() string {
 		s += cursor + formLabelStyle.Render(labels[i]) + "\n"
 		s += "  " + m.formInputs[i].View() + "\n\n"
 	}
-	s += formHelpStyle.Render("[ctrl+s] save  [esc] cancel  [tab] next field")
+	help := "[ctrl+s] save  [esc] cancel  [tab] next field"
+	if m.formFocus == 1 {
+		help += "  [enter] select host"
+	}
+	s += formHelpStyle.Render(help)
 	return s
 }

@@ -15,9 +15,9 @@ func (m *Model) initHostForm(isCreate bool, host *core.Host) {
 	m.editingHost = host
 	m.formFocus = 0
 
-	inputs := make([]textinput.Model, 5)
-	placeholders := []string{"Name", "Address", "User", "Port", "Key path"}
-	values := []string{"", "", "", "22", ""}
+	inputs := make([]textinput.Model, 6)
+	placeholders := []string{"Name", "Address", "User", "Port", "Key path", "Save to SSH-hosts"}
+	values := []string{"", "", "", "22", "", "yes"}
 
 	if host != nil {
 		values[0] = host.Name
@@ -48,10 +48,23 @@ func (m *Model) hostFormUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc":
+			if m.returnView == "tunnel_form" {
+				m.view = "host_source"
+				return m, nil
+			}
 			m.view = "table"
 			return m, nil
 		case "ctrl+s":
 			if err := m.saveHostForm(); err == nil {
+				if m.returnView == "tunnel_form" {
+					name := m.formInputs[0].Value()
+					m.restoreTunnelForm()
+					m.formInputs[1].SetValue(name)
+					m.view = "tunnel_form"
+					m.returnView = ""
+					m.refreshTables()
+					return m, nil
+				}
 				m.view = "table"
 				m.refreshTables()
 			}
@@ -65,6 +78,16 @@ func (m *Model) hostFormUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.formFocus = len(m.formInputs) - 1
 			}
 			m.updateFormFocus()
+		case " ":
+			if m.formFocus == 5 {
+				if m.formInputs[5].Value() == "yes" {
+					m.formInputs[5].SetValue("no")
+				} else {
+					m.formInputs[5].SetValue("yes")
+				}
+				return m, nil
+			}
+			m.formInputs[m.formFocus], _ = m.formInputs[m.formFocus].Update(msg)
 		default:
 			m.formInputs[m.formFocus], _ = m.formInputs[m.formFocus].Update(msg)
 		}
@@ -78,6 +101,7 @@ func (m *Model) saveHostForm() error {
 	user := m.formInputs[2].Value()
 	rawPort := m.formInputs[3].Value()
 	keyPath := m.formInputs[4].Value()
+	saveHost := yesNoToBool(m.formInputs[5].Value())
 
 	if name == "" || address == "" || user == "" {
 		return fmt.Errorf("name, address and user are required")
@@ -95,6 +119,10 @@ func (m *Model) saveHostForm() error {
 			return fmt.Errorf("port must be between 1 and 65535")
 		}
 		port = p
+	}
+
+	if !saveHost {
+		return nil
 	}
 
 	host := core.Host{
@@ -123,7 +151,7 @@ func (m *Model) saveHostForm() error {
 }
 
 func (m *Model) hostFormView() string {
-	labels := []string{"Name", "Address", "User", "Port", "Key path"}
+	labels := []string{"Name", "Address", "User", "Port", "Key path", "Save to SSH-hosts"}
 
 	s := formLabelStyle.Render("Host") + "\n\n"
 	for i := range m.formInputs {
@@ -134,6 +162,10 @@ func (m *Model) hostFormView() string {
 		s += cursor + formLabelStyle.Render(labels[i]) + "\n"
 		s += "  " + m.formInputs[i].View() + "\n\n"
 	}
-	s += formHelpStyle.Render("[ctrl+s] save  [esc] cancel  [tab] next field")
+	help := "[ctrl+s] save  [esc] cancel  [tab] next field"
+	if m.formFocus == 5 {
+		help += "  [space] toggle"
+	}
+	s += formHelpStyle.Render(help)
 	return s
 }
