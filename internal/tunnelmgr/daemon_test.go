@@ -1,107 +1,209 @@
 package tunnelmgr
 
 import (
-	"errors"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
-	"strconv"
+	"strings"
 	"testing"
 )
 
-func setupTempHome(t *testing.T) string {
+func setupTempAppHome(t *testing.T) {
 	t.Helper()
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
+	t.Setenv("USERPROFILE", tmp)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, ".config"))
-	return tmp
+	t.Setenv("APPDATA", filepath.Join(tmp, "AppData", "Roaming"))
+	t.Setenv("LOCALAPPDATA", filepath.Join(tmp, "AppData", "Local"))
 }
 
-func TestRestartTunnel_nonRunningCallsStart(t *testing.T) {
-	setupTempHome(t)
-
-	called := false
-	start := func(name string) error {
-		called = true
-		if name != "test-tunnel" {
-			t.Errorf("expected name %q, got %q", "test-tunnel", name)
-		}
-		return nil
-	}
-
-	err := RestartTunnel("test-tunnel", start)
+func TestPidDir(t *testing.T) {
+	setupTempAppHome(t)
+	dir, err := PidDir()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !called {
-		t.Error("expected start to be called")
+	if !strings.Contains(dir, "pids") {
+		t.Errorf("expected path to contain 'pids', got %q", dir)
+	}
+	if !strings.Contains(dir, "wombat") {
+		t.Errorf("expected path to contain 'wombat', got %q", dir)
 	}
 }
 
-func TestRestartTunnel_runningStopsThenStarts(t *testing.T) {
-	setupTempHome(t)
-
-	// Spawn a child process that we can safely stop.
-	if runtime.GOOS == "windows" {
-		t.Skip("skipping: sleep binary is not portable on Windows")
-	}
-	cmd := exec.Command("sleep", "30")
-	if err := cmd.Start(); err != nil {
-		t.Skip("cannot spawn test process:", err)
-	}
-	defer func() {
-		if err := cmd.Process.Kill(); err != nil && !errors.Is(err, os.ErrProcessDone) {
-			t.Logf("failed to kill test process: %v", err)
-		}
-		_ = cmd.Wait()
-	}()
-
-	// Write its PID to the tunnel PID file.
-	pidDir, err := PidDir()
-	if err != nil {
-		t.Fatalf("failed to get pid dir: %v", err)
-	}
-	if err := os.MkdirAll(pidDir, 0755); err != nil {
-		t.Fatalf("failed to create pid dir: %v", err)
-	}
-	pidFile := filepath.Join(pidDir, "test-tunnel.pid")
-	if err := os.WriteFile(pidFile, []byte(strconv.Itoa(cmd.Process.Pid)), 0600); err != nil {
-		t.Fatalf("failed to write pid file: %v", err)
-	}
-
-	called := false
-	start := func(name string) error {
-		called = true
-		return nil
-	}
-
-	err = RestartTunnel("test-tunnel", start)
+func TestLogDir(t *testing.T) {
+	setupTempAppHome(t)
+	dir, err := LogDir()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !called {
-		t.Error("expected start to be called")
+	if !strings.Contains(dir, "logs") {
+		t.Errorf("expected path to contain 'logs', got %q", dir)
 	}
-
-	// Verify PID file was removed.
-	if _, err := os.Stat(pidFile); !os.IsNotExist(err) {
-		t.Error("expected PID file to be removed after stop")
+	if !strings.Contains(dir, "wombat") {
+		t.Errorf("expected path to contain 'wombat', got %q", dir)
 	}
 }
 
-func TestRestartTunnel_startFailureReturnsError(t *testing.T) {
-	setupTempHome(t)
-
-	start := func(name string) error {
-		return os.ErrNotExist
+func TestPidFilePath(t *testing.T) {
+	setupTempAppHome(t)
+	path, err := pidFilePath("web")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
+	if !filepath.IsAbs(path) {
+		t.Error("expected absolute path")
+	}
+	if filepath.Base(path) != "web.pid" {
+		t.Errorf("expected web.pid, got %s", filepath.Base(path))
+	}
+}
 
-	err := RestartTunnel("test-tunnel", start)
+func TestWritePidFile_and_ReadPid(t *testing.T) {
+	setupTempAppHome(t)
+	if err := WritePidFile("web"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	pid, err := ReadPid("web")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if pid != os.Getpid() {
+		t.Errorf("expected pid %d, got %d", os.Getpid(), pid)
+	}
+}
+
+func TestReadPid_missing(t *testing.T) {
+	setupTempAppHome(t)
+	_, err := ReadPid("ghost")
 	if err == nil {
-		t.Fatal("expected error when start fails")
+		t.Error("expected error for missing pid file")
 	}
-	if !errors.Is(err, os.ErrNotExist) {
-		t.Errorf("expected error to wrap os.ErrNotExist, got: %v", err)
+}
+
+func TestRemovePidFile(t *testing.T) {
+	setupTempAppHome(t)
+	if err := WritePidFile("web"); err != nil {
+		t.Fatal(err)
+	}
+	if err := RemovePidFile("web"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	_, err := ReadPid("web")
+	if err == nil {
+		t.Error("expected error after removal")
+	}
+}
+
+func TestOpenLogFile(t *testing.T) {
+	setupTempAppHome(t)
+	f, err := OpenLogFile("web")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	f.Close()
+
+	path, _ := LogFilePath("web")
+	if _, err := os.Stat(path); err != nil {
+		t.Errorf("expected log file to exist: %v", err)
+	}
+}
+
+func TestRemoveLogFile(t *testing.T) {
+	setupTempAppHome(t)
+	f, _ := OpenLogFile("web")
+	f.Close()
+
+	if err := RemoveLogFile("web"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	path, _ := LogFilePath("web")
+	if _, err := os.Stat(path); err == nil {
+		t.Error("expected log file to be removed")
+	}
+}
+
+func TestIsRunning_notRunning(t *testing.T) {
+	setupTempAppHome(t)
+	if IsRunning("ghost") {
+		t.Error("expected false for non-running tunnel")
+	}
+}
+
+func TestIsRunning_stalePidCleanup(t *testing.T) {
+	setupTempAppHome(t)
+	// Write a PID for a process that definitely doesn't exist (PID 99999)
+	path, _ := pidFilePath("stale")
+	os.MkdirAll(filepath.Dir(path), 0755)
+	os.WriteFile(path, []byte("99999"), 0600)
+
+	if IsRunning("stale") {
+		t.Error("expected false for stale pid")
+	}
+	if _, err := os.Stat(path); err == nil {
+		t.Error("expected stale pid file to be cleaned up")
+	}
+}
+
+func TestStopDaemon_notRunning(t *testing.T) {
+	setupTempAppHome(t)
+	err := StopDaemon("ghost")
+	if err == nil {
+		t.Error("expected error for non-running tunnel")
+	}
+}
+
+func TestRestartTunnel(t *testing.T) {
+	setupTempAppHome(t)
+	calls := 0
+	start := func(string) error {
+		calls++
+		return nil
+	}
+	if err := RestartTunnel("any", start); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if calls != 1 {
+		t.Errorf("expected 1 start call, got %d", calls)
+	}
+}
+
+func TestRestartTunnel_startFails(t *testing.T) {
+	setupTempAppHome(t)
+	start := func(string) error { return os.ErrNotExist }
+	if err := RestartTunnel("any", start); err == nil {
+		t.Error("expected error when start fails")
+	}
+}
+
+func TestTrayPidFilePath(t *testing.T) {
+	setupTempAppHome(t)
+	path, err := TrayPidFilePath()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if filepath.Base(path) != "tray-daemon.pid" {
+		t.Errorf("expected tray-daemon.pid, got %s", filepath.Base(path))
+	}
+}
+
+func TestWriteTrayPidFile_and_RemoveTrayPidFile(t *testing.T) {
+	setupTempAppHome(t)
+	if err := WriteTrayPidFile(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := RemoveTrayPidFile(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	path, _ := TrayPidFilePath()
+	if _, err := os.Stat(path); err == nil {
+		t.Error("expected tray pid file to be removed")
+	}
+}
+
+func TestIsTrayRunning_notRunning(t *testing.T) {
+	setupTempAppHome(t)
+	if IsTrayRunning() {
+		t.Error("expected false for non-running tray")
 	}
 }

@@ -37,6 +37,14 @@ type Model struct {
 	confirmItemType string
 	SelectedHost    *core.Host
 	RestartRequired bool
+
+	// tunnel host-selection flow state
+	returnView         string
+	savedFormInputs    []textinput.Model
+	savedFormFocus     int
+	savedFormIsCreate  bool
+	savedEditingTunnel *core.Tunnel
+	hostSourceCursor   int
 }
 
 // NewModel creates a new TUI model with the given config.
@@ -92,6 +100,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.formUpdate(msg)
 	case "host_form":
 		return m.hostFormUpdate(msg)
+	case "host_source":
+		return m.hostSourceUpdate(msg)
+	case "host_select":
+		return m.hostSelectUpdate(msg)
 	case "settings_form":
 		return m.settingsFormUpdate(msg)
 	case "confirm_delete":
@@ -108,6 +120,10 @@ func (m Model) View() string {
 		return m.formView()
 	case "host_form":
 		return m.hostFormView()
+	case "host_source":
+		return m.hostSourceView()
+	case "host_select":
+		return m.hostSelectView()
 	case "settings_form":
 		return m.settingsFormView()
 	case "confirm_delete":
