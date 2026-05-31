@@ -8,7 +8,7 @@ import (
 
 func TestResolve_found(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	if err := os.MkdirAll(filepath.Join(tmp, ".ssh"), 0700); err != nil {
 		t.Fatal(err)
@@ -41,7 +41,7 @@ func TestResolve_found(t *testing.T) {
 
 func TestResolve_missing(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	if err := os.MkdirAll(filepath.Join(tmp, ".ssh"), 0700); err != nil {
 		t.Fatal(err)
@@ -58,7 +58,7 @@ func TestResolve_missing(t *testing.T) {
 
 func TestResolve_missingConfig(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	_, err := Resolve("anything")
 	if err == nil {

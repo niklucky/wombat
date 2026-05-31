@@ -6,9 +6,19 @@ import (
 	"testing"
 )
 
+// setTestHome sets the environment variables that os.UserHomeDir and
+// os.UserConfigDir consult on both Unix and Windows.
+func setTestHome(t *testing.T, tmp string) {
+	t.Helper()
+	t.Setenv("HOME", tmp)
+	t.Setenv("USERPROFILE", tmp)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, ".config"))
+	t.Setenv("LOCALAPPDATA", filepath.Join(tmp, "AppData", "Local"))
+}
+
 func TestAppHome_defaultsToConfigDir(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	home, err := AppHome()
 	if err != nil {
@@ -21,7 +31,7 @@ func TestAppHome_defaultsToConfigDir(t *testing.T) {
 
 func TestAppHome_readsPointerFile(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	custom := filepath.Join(tmp, "custom-wombat")
 	if err := SetAppHome(custom); err != nil {
@@ -39,7 +49,7 @@ func TestAppHome_readsPointerFile(t *testing.T) {
 
 func TestConfigPath(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	path, err := ConfigPath()
 	if err != nil {

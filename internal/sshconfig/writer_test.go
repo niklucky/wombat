@@ -11,7 +11,7 @@ import (
 
 func TestWriteHosts_format(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	if err := os.MkdirAll(filepath.Join(tmp, ".ssh", "config.d"), 0700); err != nil {
 		t.Fatal(err)

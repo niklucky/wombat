@@ -8,7 +8,7 @@ import (
 
 func TestReadHosts_basic(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	content := "Host web\n  HostName 10.0.0.1\n  User admin\n  Port 2222\n  IdentityFile ~/.ssh/web_key\n"
 	if err := os.MkdirAll(filepath.Join(tmp, ".ssh", "config.d"), 0700); err != nil {
@@ -45,7 +45,7 @@ func TestReadHosts_basic(t *testing.T) {
 
 func TestReadHosts_missingFile(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	if err := os.MkdirAll(filepath.Join(tmp, ".ssh", "config.d"), 0700); err != nil {
 		t.Fatal(err)

@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -62,7 +63,9 @@ func TestSaveHostForm_toggleNoDoesNotSave(t *testing.T) {
 func TestSaveHostForm_toggleYesSaves(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
-	t.Setenv("XDG_CONFIG_HOME", tmp+"/.config")
+	t.Setenv("USERPROFILE", tmp)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, ".config"))
+	t.Setenv("LOCALAPPDATA", filepath.Join(tmp, "AppData", "Local"))
 
 	m := Model{config: core.DefaultConfig()}
 	m.initHostForm(true, nil)

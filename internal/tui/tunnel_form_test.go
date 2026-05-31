@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"path/filepath"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -94,7 +95,9 @@ func TestSaveForm_validation(t *testing.T) {
 func TestSaveForm_defaultsRemoteHost(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
-	t.Setenv("XDG_CONFIG_HOME", tmp+"/.config")
+	t.Setenv("USERPROFILE", tmp)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, ".config"))
+	t.Setenv("LOCALAPPDATA", filepath.Join(tmp, "AppData", "Local"))
 
 	m := Model{config: core.DefaultConfig()}
 	m.initForm(true, nil)
@@ -117,7 +120,9 @@ func TestSaveForm_defaultsRemoteHost(t *testing.T) {
 func TestSaveForm_create(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
-	t.Setenv("XDG_CONFIG_HOME", tmp+"/.config")
+	t.Setenv("USERPROFILE", tmp)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, ".config"))
+	t.Setenv("LOCALAPPDATA", filepath.Join(tmp, "AppData", "Local"))
 
 	m := Model{config: core.DefaultConfig()}
 	m.initForm(true, nil)
@@ -138,7 +143,9 @@ func TestSaveForm_create(t *testing.T) {
 func TestSaveForm_editInPlace(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
-	t.Setenv("XDG_CONFIG_HOME", tmp+"/.config")
+	t.Setenv("USERPROFILE", tmp)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, ".config"))
+	t.Setenv("LOCALAPPDATA", filepath.Join(tmp, "AppData", "Local"))
 
 	cfg := core.DefaultConfig()
 	cfg.AddTunnel(core.Tunnel{Name: "web", HostName: "old", LocalPort: 80, RemotePort: 80})
@@ -160,7 +167,9 @@ func TestSaveForm_editInPlace(t *testing.T) {
 func TestSaveForm_rename(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
-	t.Setenv("XDG_CONFIG_HOME", tmp+"/.config")
+	t.Setenv("USERPROFILE", tmp)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, ".config"))
+	t.Setenv("LOCALAPPDATA", filepath.Join(tmp, "AppData", "Local"))
 
 	cfg := core.DefaultConfig()
 	cfg.AddTunnel(core.Tunnel{Name: "old", HostName: "server", LocalPort: 80, RemotePort: 80})

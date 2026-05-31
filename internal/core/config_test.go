@@ -1,7 +1,6 @@
 package core
 
 import (
-	"path/filepath"
 	"testing"
 
 	"github.com/niklucky/wombat/internal/models"
@@ -139,8 +138,7 @@ func TestRemoveKey(t *testing.T) {
 
 func TestConfigLoadSave_roundTrip(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
-	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, ".config"))
+	setTestHome(t, tmp)
 
 	cfg := DefaultConfig()
 	cfg.OpenTray = false
@@ -177,8 +175,7 @@ func TestConfigLoadSave_roundTrip(t *testing.T) {
 
 func TestConfigLoad_missingFileStartsEmpty(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
-	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, ".config"))
+	setTestHome(t, tmp)
 
 	cfg := DefaultConfig()
 	if err := cfg.Load(); err != nil {

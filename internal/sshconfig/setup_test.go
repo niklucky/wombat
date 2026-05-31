@@ -9,7 +9,7 @@ import (
 
 func TestEnsureSetup_createsNewConfig(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	if err := EnsureSetup(); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -40,7 +40,7 @@ func TestEnsureSetup_createsNewConfig(t *testing.T) {
 
 func TestEnsureSetup_prependsToExistingConfig(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	if err := os.MkdirAll(filepath.Join(tmp, ".ssh"), 0700); err != nil {
 		t.Fatal(err)

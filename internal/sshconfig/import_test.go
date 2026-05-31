@@ -8,7 +8,7 @@ import (
 
 func TestImportFromMainConfig_skipsWildcardsAndIncludes(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	if err := os.MkdirAll(filepath.Join(tmp, ".ssh"), 0700); err != nil {
 		t.Fatal(err)
@@ -45,7 +45,7 @@ Host db?!?
 
 func TestImportFromMainConfig_missingFile(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	hosts, err := ImportFromMainConfig()
 	if err != nil {
@@ -58,7 +58,7 @@ func TestImportFromMainConfig_missingFile(t *testing.T) {
 
 func TestImportFromMainConfig_fallbackAddress(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("HOME", tmp)
+	setTestHome(t, tmp)
 
 	if err := os.MkdirAll(filepath.Join(tmp, ".ssh"), 0700); err != nil {
 		t.Fatal(err)
