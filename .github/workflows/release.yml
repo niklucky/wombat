@@ -116,3 +116,39 @@ jobs:
             --title "${{ github.ref_name }}" \
             --generate-notes \
             dist/*
+
+  snap:
+    name: Publish Snap
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # 6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Build Snap
+        uses: snapcore/action-build@v1
+        id: snap-build
+
+      - name: Publish Snap
+        uses: snapcore/action-publish@v1
+        with:
+          snap: ${{ steps.snap-build.outputs.snap }}
+          release: stable
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+
+  brew:
+    name: Publish Homebrew Formula
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Homebrew formula
+        uses: mislav/bump-homebrew-formula-action@v3
+        with:
+          formula-name: wombat
+          homebrew-tap: niklucky/homebrew-tap
+          tag-name: ${{ github.ref_name }}
+        env:
+          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
