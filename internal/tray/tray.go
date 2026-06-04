@@ -14,6 +14,7 @@ import (
 	"github.com/gogpu/systray"
 	"github.com/niklucky/wombat/assets"
 	"github.com/niklucky/wombat/internal/core"
+	"github.com/niklucky/wombat/internal/icon"
 	"github.com/niklucky/wombat/internal/notify"
 	"github.com/niklucky/wombat/internal/tunnelmgr"
 )
@@ -25,14 +26,27 @@ import (
 // When the event loop exits, the tray PID file is removed.
 func RunWithTunnels(cfg core.Config) {
 	tray := systray.New()
-	if assets.TrayIcon != nil {
-		tray.SetIcon(assets.TrayIcon)
+
+	var lastIconState icon.State
+	updateIcon := func(state icon.State) {
+		if state == lastIconState {
+			return
+		}
+		iconBytes, err := icon.Generate(assets.TrayIcon, state)
+		if err != nil {
+			log.Printf("failed to generate tray icon: %v", err)
+			tray.SetIcon(assets.TrayIcon)
+			return
+		}
+		tray.SetIcon(iconBytes)
+		lastIconState = state
 	}
 
 	var refresh func()
 	refresh = func() {
 		tray.SetMenu(buildMenu(tray, cfg, refresh))
 		updateTooltip(tray, cfg)
+		updateIcon(iconState(cfg))
 	}
 
 	refresh()
@@ -186,6 +200,13 @@ func tunnelLabel(name string, active bool, elapsed string) string {
 		return fmt.Sprintf("%s %s %s", emoji, name, elapsed)
 	}
 	return fmt.Sprintf("%s %s", emoji, name)
+}
+
+func iconState(cfg core.Config) icon.State {
+	return icon.State{
+		Connected: len(activeTunnels(cfg)),
+		Total:     len(cfg.Tunnels),
+	}
 }
 
 func activeTunnels(cfg core.Config) []string {
