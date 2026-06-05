@@ -106,11 +106,10 @@ func (m *Model) renderTableView() string {
 
 	// Actions bar
 	s += "  Actions: "
-	s += actionStyle.Render("[i]") + helpStyle.Render(" Tray ")
 	s += actionStyle.Render("[?]") + helpStyle.Render(" Help ")
 	s += actionStyle.Render("[s]") + helpStyle.Render(" Settings ")
-	s += actionStyle.Render("[a]") + helpStyle.Render(" Add tunnel ")
-	s += actionStyle.Render("[n]") + helpStyle.Render(" Add host ")
+	s += actionStyle.Render("[⇥]") + helpStyle.Render(" Select tab ")
+	s += actionStyle.Render("[q]") + helpStyle.Render(" Quit ")
 	s += "\n\n"
 
 	// Tabs
@@ -131,10 +130,10 @@ func (m *Model) renderTableView() string {
 	// Table content
 	if m.activeTab == "tunnels" {
 		s += m.tunnelTable.View()
-		s += "\n" + helpStyle.Render("  [↑/↓] navigate  [↵] edit  [c] connect  [d] disconnect  [r] restart  [⌫] delete  [a] add  [⇥] switch  [q] quit")
+		s += "\n" + helpStyle.Render("  [↑/↓] Navigate  [↵] Edit  [Space] Connect/Disconnect  [r] Restart  [n] Add  [⌫] Delete")
 	} else {
 		s += m.hostTable.View()
-		s += "\n" + helpStyle.Render("  [↑/↓] navigate  [↵] edit  [c] connect  [t] test  [n] add  [⌫] delete  [⇥] switch  [q] quit")
+		s += "\n" + helpStyle.Render("  [↑/↓] Navigate  [↵] Edit  [Space] Connect  [t] Test  [n] Add  [⌫] Delete")
 	}
 
 	return s
