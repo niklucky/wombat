@@ -130,10 +130,10 @@ func (m *Model) renderTableView() string {
 	// Table content
 	if m.activeTab == "tunnels" {
 		s += m.tunnelTable.View()
-		s += "\n" + helpStyle.Render("  [↑/↓] Navigate  [↵] Edit  [Space] Connect/Disconnect  [r] Restart  [n] Add  [⌫] Delete")
+		s += "\n  " + actionStyle.Render("[↵]") + helpStyle.Render(" Edit  ") + actionStyle.Render("[Space]") + helpStyle.Render(" Connect/Disconnect  ") + actionStyle.Render("[r]") + helpStyle.Render(" Restart  ") + actionStyle.Render("[n]") + helpStyle.Render(" Add  ") + actionStyle.Render("[⌫]") + helpStyle.Render(" Delete")
 	} else {
 		s += m.hostTable.View()
-		s += "\n" + helpStyle.Render("  [↑/↓] Navigate  [↵] Edit  [Space] Connect  [t] Test  [n] Add  [⌫] Delete")
+		s += "\n  " + actionStyle.Render("[↵]") + helpStyle.Render(" Edit  ") + actionStyle.Render("[t]") + helpStyle.Render(" Test  ") + actionStyle.Render("[n]") + helpStyle.Render(" Add  ") + actionStyle.Render("[⌫]") + helpStyle.Render(" Delete")
 	}
 
 	return s
