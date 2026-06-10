@@ -92,6 +92,13 @@ fi
 cp "${TMP_DIR}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
 chmod +x "${INSTALL_DIR}/${BINARY_NAME}"
 
+# Re-sign with a fresh ad-hoc signature. The Go linker's built-in
+# "linker-signed" signature is rejected by macOS (Code Signature Invalid /
+# SIGKILL) once the binary is moved/extracted on the target machine.
+if [ "$OS" = "darwin" ] && command -v codesign >/dev/null 2>&1; then
+    codesign --force --sign - "${INSTALL_DIR}/${BINARY_NAME}" 2>/dev/null || true
+fi
+
 echo ""
 echo "${BINARY} ${VERSION} installed to ${INSTALL_DIR}/${BINARY_NAME}"
 
