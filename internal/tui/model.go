@@ -108,6 +108,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.settingsFormUpdate(msg)
 	case "confirm_delete":
 		return m.confirmUpdate(msg)
+	case "help":
+		return m.helpUpdate(msg)
 	default:
 		return m.tableUpdate(msg)
 	}
@@ -128,6 +130,8 @@ func (m Model) View() string {
 		return m.settingsFormView()
 	case "confirm_delete":
 		return renderConfirmDelete(m.confirmItemType, m.confirmItem)
+	case "help":
+		return m.renderHelpView()
 	default:
 		return m.renderTableView()
 	}
@@ -151,25 +155,16 @@ func (m *Model) tableUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				m.activeTab = "hosts"
 			}
-		case "i":
-			// Open tray in background
-			exe, err := os.Executable()
-			if err != nil {
-				exe = "wombat"
-			}
-			cmd := exec.Command(exe, "tray-daemon")
-			cmd.SysProcAttr = platform.DaemonSysProcAttr()
-			_ = cmd.Start()
-		case "a":
+		case "n":
 			if m.activeTab == "tunnels" {
 				m.initForm(true, nil)
-			}
-		case "n":
-			if m.activeTab == "hosts" {
+			} else {
 				m.initHostForm(true, nil)
 			}
 		case "s":
 			m.initSettingsForm()
+		case "?":
+			m.view = "help"
 		case "t":
 			if m.activeTab == "hosts" {
 				m.testSelectedHost()
@@ -192,9 +187,19 @@ func (m *Model) tableUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 				}
 			}
-		case "c":
+		case " ":
 			if m.activeTab == "tunnels" {
-				m.startSelectedTunnel()
+				if len(m.config.Tunnels) > 0 {
+					idx := m.tunnelTable.Cursor()
+					if idx < len(m.config.Tunnels) {
+						t := m.config.Tunnels[idx]
+						if tunnelmgr.IsRunning(t.Name) {
+							m.stopSelectedTunnel()
+						} else {
+							m.startSelectedTunnel()
+						}
+					}
+				}
 			} else {
 				if len(m.config.Hosts) > 0 {
 					idx := m.hostTable.Cursor()
@@ -204,10 +209,6 @@ func (m *Model) tableUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 						return m, tea.Quit
 					}
 				}
-			}
-		case "d":
-			if m.activeTab == "tunnels" {
-				m.stopSelectedTunnel()
 			}
 		case "r":
 			if m.activeTab == "tunnels" {
