@@ -1,0 +1,223 @@
+{
+  "app": {
+    "title": "Wombat SSH Helper",
+    "subtitle": "跨平台 SSH 助手，支持 TUI 和系统托盘",
+    "shortDescription": "Wombat — 跨平台 SSH 助手",
+    "longDescription": "Wombat 是一个跨平台 SSH 助手，支持 TUI 和系统托盘。"
+  },
+  "common": {
+    "yes": "是",
+    "no": "否"
+  },
+  "actions": {
+    "label": "操作：",
+    "help": "帮助",
+    "settings": "设置",
+    "selectTab": "切换标签页",
+    "quit": "退出"
+  },
+  "tabs": {
+    "tunnels": "隧道",
+    "hosts": "SSH 主机"
+  },
+  "status": {
+    "active": "活动中",
+    "inactive": "未激活"
+  },
+  "keys": {
+    "navigate": "导航",
+    "edit": "编辑",
+    "connect": "连接",
+    "connectDisconnect": "连接 / 断开",
+    "restart": "重启",
+    "add": "添加",
+    "delete": "删除",
+    "test": "测试",
+    "testConnection": "测试连接",
+    "save": "保存",
+    "cancel": "取消",
+    "nextField": "下一字段",
+    "selectHost": "选择主机",
+    "toggle": "切换",
+    "confirm": "确认"
+  },
+  "table": {
+    "columns": {
+      "number": "#",
+      "name": "名称",
+      "host": "主机",
+      "forward": "转发",
+      "address": "地址",
+      "user": "用户",
+      "port": "端口"
+    }
+  },
+  "forms": {
+    "labels": {
+      "name": "名称",
+      "address": "地址",
+      "user": "用户",
+      "port": "端口",
+      "keyPath": "密钥路径",
+      "saveToSSHHosts": "保存到 SSH 主机",
+      "hostAlias": "主机别名",
+      "localPort": "本地端口",
+      "remoteHost": "远程主机",
+      "remotePort": "远程端口",
+      "appHomeFolder": "应用主目录",
+      "openTrayOnStart": "启动时打开托盘",
+      "showNotifications": "显示通知"
+    },
+    "placeholders": {
+      "name": "名称",
+      "address": "地址",
+      "user": "用户",
+      "port": "端口",
+      "keyPath": "密钥路径",
+      "saveToSSHHosts": "保存到 SSH 主机",
+      "hostAlias": "主机别名",
+      "localPort": "本地端口",
+      "remoteHost": "远程主机",
+      "remotePort": "远程端口",
+      "appHomeFolder": "应用主目录",
+      "openTrayOnStart": "启动时打开托盘（是/否）",
+      "showNotifications": "显示通知（是/否）"
+    },
+    "help": {
+      "saveEscCancelTab": "[ctrl+s] 保存  [esc] 取消  [tab] 下一字段",
+      "selectHost": "[enter] 选择主机",
+      "toggle": "[space] 切换"
+    },
+    "titles": {
+      "tunnel": "隧道",
+      "host": "主机",
+      "settings": "设置",
+      "selectSSHHost": "选择 SSH 主机",
+      "selectHostSource": "选择主机来源"
+    },
+    "options": {
+      "selectExistingHost": "从现有 SSH 主机中选择",
+      "enterCustomHost": "输入自定义 SSH 主机"
+    }
+  },
+  "help": {
+    "title": "键盘快捷键",
+    "global": "全局",
+    "tunnels": "隧道",
+    "hosts": "SSH 主机",
+    "goBack": "按 [esc]、[?] 或 [q] 返回"
+  },
+  "dialog": {
+    "deleteTitle": "删除 %s %q？",
+    "confirm": " 确认  ",
+    "cancel": " 取消"
+  },
+  "messages": {
+    "noHostsConfigured": "没有配置主机。",
+    "tunnelStarted": "隧道 %s 已启动",
+    "tunnelStopped": "隧道 %s 已停止",
+    "tunnelRestarted": "隧道 %s 已重启",
+    "failedToStart": "启动 %s 失败：%v",
+    "failedToStop": "停止 %s 失败：%v",
+    "failedToRestart": "重启 %s 失败：%v",
+    "connectionOK": "%s：连接正常",
+    "connectionFailed": "%s：连接失败",
+    "appHomeMoved": "应用主目录已移动到 %s — 需要重启",
+    "appHomeChanged": "应用主目录已更改。请重启 Wombat。"
+  },
+  "tray": {
+    "title": "Wombat SSH Helper",
+    "start": "启动",
+    "stop": "停止",
+    "restart": "重启",
+    "openLogs": "打开日志",
+    "edit": "编辑",
+    "openApp": "打开应用",
+    "testNotification": "测试通知",
+    "testNotificationBody": "来自托盘的问候！",
+    "quit": "退出",
+    "stopBeforeQuit": "退出前停止 %d 个活动隧道？",
+    "yes": "是",
+    "no": "否",
+    "activeTooltip": "%s 活动中（%s）",
+    "activeCountTooltip": "%d 个隧道活动中",
+    "failed": "托盘失败：%v",
+    "binaryNotFound": "找不到 wombat 可执行文件。请将其放到 PATH 中的某个目录。",
+    "failedOpenTerminal": "打开终端失败：%v",
+    "failedOpenTUI": "打开 TUI 失败：%v",
+    "failedGetLogPath": "获取日志路径失败：%v",
+    "noLogsYet": "隧道 %s 还没有日志",
+    "failedOpenLog": "打开日志失败：%v"
+  },
+  "cli": {
+    "listHosts": "列出已配置的主机",
+    "addHost": "添加新主机",
+    "removeHost": "删除主机",
+    "connect": "通过 SSH 连接到主机",
+    "test": "测试与主机的 TCP 连接",
+    "importSSHConfig": "从 ~/.ssh/config 导入主机到 Wombat",
+    "addTunnel": "添加新隧道",
+    "removeTunnel": "删除隧道",
+    "tunnelDaemon": "在后台运行隧道（内部使用）",
+    "trayDaemon": "运行系统托盘守护进程（内部使用）",
+    "tunnelStart": "在后台启动隧道",
+    "tunnelStop": "停止运行中的隧道",
+    "tunnelRestart": "重启隧道",
+    "tui": "启动 TUI",
+    "tunnelList": "列出所有隧道",
+    "version": "显示版本",
+    "hostAdded": "主机 %q 已添加。",
+    "hostRemoved": "主机 %q 已删除。",
+    "hostNotFound": "找不到主机 %q",
+    "connectionFailed": "连接失败：%v",
+    "connectionOK": "连接正常",
+    "noImportableHosts": "在 ~/.ssh/config 中找不到可导入的主机。",
+    "skippingExisting": "跳过 %q（已存在）",
+    "importedHost": "已导入 %q（%s@%s）",
+    "importedCount": "已导入 %d 个主机。",
+    "noNewHosts": "没有新主机可导入。",
+    "tunnelAdded": "隧道 %q 已添加：localhost:%d -> %s:%d 通过 %s",
+    "tunnelRunning": "隧道 %q 仍在运行；删除前请先停止",
+    "tunnelRemoved": "隧道 %q 已删除。",
+    "tunnelNotFound": "找不到隧道 %q",
+    "hostForTunnelNotFound": "找不到隧道对应的主机 %q",
+    "tunnelFailedToStartWithLog": "隧道 %q 启动失败；日志输出：\n%s",
+    "tunnelFailedToStart": "隧道 %q 启动失败（查看日志：%s）",
+    "tunnelStarted": "隧道 %q 已在后台启动（PID %d）。",
+    "logs": "日志：%s",
+    "tunnelNotRunning": "隧道 %q 未运行",
+    "tunnelStopped": "隧道 %q 已停止。",
+    "tunnelAlreadyRunning": "隧道 %q 已在运行",
+    "addressAndUserRequired": "--address 和 --user 是必填项",
+    "hostLocalRemoteRequired": "--host、--local-port 和 --remote-port 是必填项",
+    "findExecutable": "查找可执行文件：%w",
+    "startDaemon": "启动守护进程：%w",
+    "versionFormat": "wombat %s"
+  },
+  "flags": {
+    "address": "主机地址（必填）",
+    "user": "SSH 用户（必填）",
+    "port": "SSH 端口",
+    "key": "私钥路径",
+    "host": "隧道使用的 SSH 主机别名（必填）",
+    "localPort": "要监听的本地端口（必填）",
+    "remoteHost": "要转发到的远程主机",
+    "remotePort": "要转发到的远程端口（必填）",
+    "editTunnel": "直接打开 TUI 到指定隧道的编辑表单"
+  },
+  "errors": {
+    "trayDaemonNotRunning": "托盘守护进程未运行",
+    "invalidTrayPid": "托盘 PID 文件无效",
+    "trayProcessNotFound": "找不到托盘守护进程",
+    "keepaliveTimedOut": "keepalive 超时",
+    "noAuthMethods": "没有可用的认证方式",
+    "openLogFile": "打开日志文件：%w",
+    "writePidFile": "写入 PID 文件：%w",
+    "appHomeEmpty": "应用主目录不能为空",
+    "setAppHome": "设置应用主目录失败：%w",
+    "allFieldsRequired": "所有字段都是必填项",
+    "nameAddressUserRequired": "名称、地址和用户是必填项",
+    "invalidPort": "无效端口：%v",
+    "portRange": "端口必须在 1 到 65535 之间"
+  }
+}

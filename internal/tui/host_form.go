@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/niklucky/wombat/internal/core"
+	"github.com/niklucky/wombat/internal/locales"
 )
 
 func (m *Model) initHostForm(isCreate bool, host *core.Host) {
@@ -16,8 +17,17 @@ func (m *Model) initHostForm(isCreate bool, host *core.Host) {
 	m.formFocus = 0
 
 	inputs := make([]textinput.Model, 6)
-	placeholders := []string{"Name", "Address", "User", "Port", "Key path", "Save to SSH-hosts"}
-	values := []string{"", "", "", "22", "", "yes"}
+	bools := make([]bool, 6)
+	placeholders := []string{
+		locales.T("forms.placeholders.name"),
+		locales.T("forms.placeholders.address"),
+		locales.T("forms.placeholders.user"),
+		locales.T("forms.placeholders.port"),
+		locales.T("forms.placeholders.keyPath"),
+		locales.T("forms.placeholders.saveToSSHHosts"),
+	}
+	values := []string{"", "", "", "22", "", ""}
+	bools[5] = true
 
 	if host != nil {
 		values[0] = host.Name
@@ -34,13 +44,18 @@ func (m *Model) initHostForm(isCreate bool, host *core.Host) {
 	for i := range inputs {
 		inputs[i] = textinput.New()
 		inputs[i].Placeholder = placeholders[i]
-		inputs[i].SetValue(values[i])
+		if i == 5 {
+			inputs[i].SetValue(boolToYesNo(bools[i]))
+		} else {
+			inputs[i].SetValue(values[i])
+		}
 		inputs[i].CharLimit = 100
 		inputs[i].Width = 40
 	}
 	inputs[0].Focus()
 
 	m.formInputs = inputs
+	m.formBools = bools
 }
 
 func (m *Model) hostFormUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -80,11 +95,8 @@ func (m *Model) hostFormUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.updateFormFocus()
 		case " ":
 			if m.formFocus == 5 {
-				if m.formInputs[5].Value() == "yes" {
-					m.formInputs[5].SetValue("no")
-				} else {
-					m.formInputs[5].SetValue("yes")
-				}
+				m.formBools[5] = !m.formBools[5]
+				m.formInputs[5].SetValue(boolToYesNo(m.formBools[5]))
 				return m, nil
 			}
 			m.formInputs[m.formFocus], _ = m.formInputs[m.formFocus].Update(msg)
@@ -101,10 +113,10 @@ func (m *Model) saveHostForm() error {
 	user := m.formInputs[2].Value()
 	rawPort := m.formInputs[3].Value()
 	keyPath := m.formInputs[4].Value()
-	saveHost := yesNoToBool(m.formInputs[5].Value())
+	saveHost := m.formBools[5]
 
 	if name == "" || address == "" || user == "" {
-		return fmt.Errorf("name, address and user are required")
+		return locales.Errorf("errors.nameAddressUserRequired")
 	}
 
 	var port int
@@ -113,10 +125,10 @@ func (m *Model) saveHostForm() error {
 	} else {
 		p, err := strconv.Atoi(rawPort)
 		if err != nil {
-			return fmt.Errorf("invalid port: %v", err)
+			return locales.Errorf("errors.invalidPort", err)
 		}
 		if p < 1 || p > 65535 {
-			return fmt.Errorf("port must be between 1 and 65535")
+			return locales.Errorf("errors.portRange")
 		}
 		port = p
 	}
@@ -151,9 +163,16 @@ func (m *Model) saveHostForm() error {
 }
 
 func (m *Model) hostFormView() string {
-	labels := []string{"Name", "Address", "User", "Port", "Key path", "Save to SSH-hosts"}
+	labels := []string{
+		locales.T("forms.labels.name"),
+		locales.T("forms.labels.address"),
+		locales.T("forms.labels.user"),
+		locales.T("forms.labels.port"),
+		locales.T("forms.labels.keyPath"),
+		locales.T("forms.labels.saveToSSHHosts"),
+	}
 
-	s := formLabelStyle.Render("Host") + "\n\n"
+	s := formLabelStyle.Render(locales.T("forms.titles.host")) + "\n\n"
 	for i := range m.formInputs {
 		cursor := "  "
 		if i == m.formFocus {
@@ -162,9 +181,9 @@ func (m *Model) hostFormView() string {
 		s += cursor + formLabelStyle.Render(labels[i]) + "\n"
 		s += "  " + m.formInputs[i].View() + "\n\n"
 	}
-	help := "[ctrl+s] save  [esc] cancel  [tab] next field"
+	help := locales.T("forms.help.saveEscCancelTab")
 	if m.formFocus == 5 {
-		help += "  [space] toggle"
+		help += "  " + locales.T("forms.help.toggle")
 	}
 	s += formHelpStyle.Render(help)
 	return s

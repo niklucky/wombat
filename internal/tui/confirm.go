@@ -1,12 +1,12 @@
 package tui
 
-import "fmt"
+import "github.com/niklucky/wombat/internal/locales"
 
 func renderConfirmDelete(itemType, item string) string {
 	s := dialogBoxStyle.Render(
-		confirmTextStyle.Render(fmt.Sprintf("Delete %s %q?", itemType, item)) + "\n\n" +
-			confirmKeyStyle.Render("y") + confirmTextStyle.Render(" confirm  ") +
-			confirmKeyStyle.Render("n") + confirmTextStyle.Render(" cancel"),
+		confirmTextStyle.Render(locales.T("dialog.deleteTitle", itemType, item)) + "\n\n" +
+			confirmKeyStyle.Render("y") + confirmTextStyle.Render(locales.T("dialog.confirm")) + "  " +
+			confirmKeyStyle.Render("n") + confirmTextStyle.Render(locales.T("dialog.cancel")),
 	)
 	return s
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/niklucky/wombat/internal/core"
+	"github.com/niklucky/wombat/internal/locales"
 	"github.com/niklucky/wombat/internal/notify"
 	"github.com/niklucky/wombat/internal/platform"
 	"github.com/niklucky/wombat/internal/sshutil"
@@ -26,6 +27,7 @@ type Model struct {
 	hostTable   table.Model
 
 	formInputs    []textinput.Model
+	formBools     []bool
 	formFocus     int
 	formIsCreate  bool
 	editingTunnel *core.Tunnel
@@ -273,9 +275,9 @@ func (m *Model) testSelectedHost() {
 	}
 	h := m.config.Hosts[idx]
 	if err := sshutil.TestConnection(h); err != nil {
-		notify.Alert("Wombat", fmt.Sprintf("%s: connection failed", h.Name))
+		notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("messages.connectionFailed"), h.Name))
 	} else {
-		notify.Notify("Wombat", fmt.Sprintf("%s: connection OK", h.Name))
+		notify.Notify(locales.T("app.title"), fmt.Sprintf(locales.T("messages.connectionOK"), h.Name))
 	}
 }
 
@@ -298,9 +300,9 @@ func (m *Model) startSelectedTunnel() {
 	cmd := exec.Command(exe, "tunnel-start", t.Name)
 	cmd.SysProcAttr = platform.DaemonSysProcAttr()
 	if err := cmd.Start(); err != nil {
-		notify.Alert("Wombat", fmt.Sprintf("Failed to start %s: %v", t.Name, err))
+		notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("messages.failedToStart"), t.Name, err))
 	} else {
-		notify.Notify("Wombat", fmt.Sprintf("Tunnel %s started", t.Name))
+		notify.Notify(locales.T("app.title"), fmt.Sprintf(locales.T("messages.tunnelStarted"), t.Name))
 		m.refreshTunnelRows()
 	}
 }
@@ -318,9 +320,9 @@ func (m *Model) stopSelectedTunnel() {
 		return
 	}
 	if err := tunnelmgr.StopDaemon(t.Name); err != nil {
-		notify.Alert("Wombat", fmt.Sprintf("Failed to stop %s: %v", t.Name, err))
+		notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("messages.failedToStop"), t.Name, err))
 	} else {
-		notify.Notify("Wombat", fmt.Sprintf("Tunnel %s stopped", t.Name))
+		notify.Notify(locales.T("app.title"), fmt.Sprintf(locales.T("messages.tunnelStopped"), t.Name))
 		m.refreshTunnelRows()
 	}
 }
@@ -344,9 +346,9 @@ func (m *Model) restartSelectedTunnel() {
 		return cmd.Run()
 	}
 	if err := tunnelmgr.RestartTunnel(t.Name, start); err != nil {
-		notify.Alert("Wombat", fmt.Sprintf("Failed to restart %s: %v", t.Name, err))
+		notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("messages.failedToRestart"), t.Name, err))
 	} else {
-		notify.Notify("Wombat", fmt.Sprintf("Tunnel %s restarted", t.Name))
+		notify.Notify(locales.T("app.title"), fmt.Sprintf(locales.T("messages.tunnelRestarted"), t.Name))
 		m.refreshTunnelRows()
 	}
 }

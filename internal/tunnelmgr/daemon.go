@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/niklucky/wombat/internal/core"
+	"github.com/niklucky/wombat/internal/locales"
 )
 
 // PidDir returns the directory where PID files are stored.
@@ -192,17 +193,17 @@ func StopTrayDaemon() error {
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("tray daemon is not running")
+		return locales.Errorf("errors.trayDaemonNotRunning")
 	}
 	pid, err := strconv.Atoi(string(data))
 	if err != nil {
 		_ = os.Remove(path)
-		return fmt.Errorf("invalid tray PID file")
+		return locales.Errorf("errors.invalidTrayPid")
 	}
 	proc, err := os.FindProcess(pid)
 	if err != nil {
 		_ = os.Remove(path)
-		return fmt.Errorf("tray daemon process not found")
+		return locales.Errorf("errors.trayProcessNotFound")
 	}
 	if err := proc.Signal(os.Interrupt); err != nil {
 		_ = proc.Signal(os.Kill)

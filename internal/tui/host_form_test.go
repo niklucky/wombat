@@ -50,7 +50,8 @@ func TestSaveHostForm_toggleNoDoesNotSave(t *testing.T) {
 	m.formInputs[0].SetValue("temp")
 	m.formInputs[1].SetValue("10.0.0.1")
 	m.formInputs[2].SetValue("root")
-	m.formInputs[5].SetValue("no")
+	m.formBools[5] = false
+	m.formInputs[5].SetValue(boolToYesNo(false))
 
 	if err := m.saveHostForm(); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -73,7 +74,8 @@ func TestSaveHostForm_toggleYesSaves(t *testing.T) {
 	m.formInputs[0].SetValue("web")
 	m.formInputs[1].SetValue("10.0.0.1")
 	m.formInputs[2].SetValue("root")
-	m.formInputs[5].SetValue("yes")
+	m.formBools[5] = true
+	m.formInputs[5].SetValue(boolToYesNo(true))
 
 	if err := m.saveHostForm(); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -89,7 +91,8 @@ func TestSaveHostForm_toggleYesSaves(t *testing.T) {
 func TestSaveHostForm_validation(t *testing.T) {
 	m := Model{config: core.DefaultConfig()}
 	m.initHostForm(true, nil)
-	m.formInputs[5].SetValue("yes")
+	m.formBools[5] = true
+	m.formInputs[5].SetValue(boolToYesNo(true))
 
 	if err := m.saveHostForm(); err == nil {
 		t.Error("expected error for empty required fields")
@@ -103,7 +106,8 @@ func TestSaveHostForm_invalidPort(t *testing.T) {
 	m.formInputs[1].SetValue("10.0.0.1")
 	m.formInputs[2].SetValue("root")
 	m.formInputs[3].SetValue("abc")
-	m.formInputs[5].SetValue("yes")
+	m.formBools[5] = true
+	m.formInputs[5].SetValue(boolToYesNo(true))
 
 	if err := m.saveHostForm(); err == nil {
 		t.Error("expected error for invalid port")
@@ -117,7 +121,8 @@ func TestSaveHostForm_portOutOfRange(t *testing.T) {
 	m.formInputs[1].SetValue("10.0.0.1")
 	m.formInputs[2].SetValue("root")
 	m.formInputs[3].SetValue("99999")
-	m.formInputs[5].SetValue("yes")
+	m.formBools[5] = true
+	m.formInputs[5].SetValue(boolToYesNo(true))
 
 	if err := m.saveHostForm(); err == nil {
 		t.Error("expected error for out-of-range port")
@@ -130,13 +135,19 @@ func TestHostFormUpdate_spaceTogglesSaveField(t *testing.T) {
 	m.formFocus = 5
 
 	m.hostFormUpdate(tea.KeyMsg{Type: tea.KeySpace})
-	if m.formInputs[5].Value() != "no" {
+	if m.formInputs[5].Value() != boolToYesNo(false) {
 		t.Errorf("expected no after toggle, got %s", m.formInputs[5].Value())
+	}
+	if m.formBools[5] != false {
+		t.Errorf("expected bool false after toggle, got %v", m.formBools[5])
 	}
 
 	m.hostFormUpdate(tea.KeyMsg{Type: tea.KeySpace})
-	if m.formInputs[5].Value() != "yes" {
+	if m.formInputs[5].Value() != boolToYesNo(true) {
 		t.Errorf("expected yes after second toggle, got %s", m.formInputs[5].Value())
+	}
+	if m.formBools[5] != true {
+		t.Errorf("expected bool true after second toggle, got %v", m.formBools[5])
 	}
 }
 
@@ -164,7 +175,8 @@ func TestHostFormUpdate_ctrlSFromTunnelFlowRestoresForm(t *testing.T) {
 	m.formInputs[0].SetValue("web")
 	m.formInputs[1].SetValue("10.0.0.1")
 	m.formInputs[2].SetValue("root")
-	m.formInputs[5].SetValue("no")
+	m.formBools[5] = false
+	m.formInputs[5].SetValue(boolToYesNo(false))
 
 	// Save tunnel form state so restore works
 	m.savedFormInputs = make([]textinput.Model, 5)

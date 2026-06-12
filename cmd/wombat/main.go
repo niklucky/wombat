@@ -12,6 +12,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 	"github.com/niklucky/wombat/internal/core"
+	"github.com/niklucky/wombat/internal/locales"
 	"github.com/niklucky/wombat/internal/sshconfig"
 	"github.com/niklucky/wombat/internal/sshutil"
 	"github.com/niklucky/wombat/internal/tray"
@@ -21,8 +22,8 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "wombat",
-	Short: "Wombat — a cross-platform SSH helper",
-	Long:  `Wombat is a cross-platform SSH helper with TUI and system tray.`,
+	Short: locales.T("app.shortDescription"),
+	Long:  locales.T("app.longDescription"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Default: start TUI + tray
 		if err := sshconfig.EnsureSetup(); err != nil {
@@ -32,6 +33,7 @@ var rootCmd = &cobra.Command{
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		applyConfigLanguage(cfg)
 
 		// Restart tray daemon in background process (only if enabled)
 		if cfg.OpenTray {
@@ -49,7 +51,7 @@ var rootCmd = &cobra.Command{
 		}
 		if m, ok := finalModel.(tui.Model); ok {
 			if m.RestartRequired {
-				fmt.Println("App home changed. Please restart Wombat.")
+				fmt.Println(locales.T("messages.appHomeChanged"))
 				return nil
 			}
 			if m.SelectedHost != nil {
@@ -62,7 +64,7 @@ var rootCmd = &cobra.Command{
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List configured hosts",
+	Short: locales.T("cli.listHosts"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := sshconfig.EnsureSetup(); err != nil {
 			return err
@@ -71,6 +73,7 @@ var listCmd = &cobra.Command{
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		applyConfigLanguage(cfg)
 		for _, h := range cfg.Hosts {
 			port := h.Port
 			if port == 0 {
@@ -84,7 +87,7 @@ var listCmd = &cobra.Command{
 
 var addHostCmd = &cobra.Command{
 	Use:   "add-host <name>",
-	Short: "Add a new host",
+	Short: locales.T("cli.addHost"),
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := sshconfig.EnsureSetup(); err != nil {
@@ -96,13 +99,14 @@ var addHostCmd = &cobra.Command{
 		key, _ := cmd.Flags().GetString("key")
 
 		if address == "" || user == "" {
-			return fmt.Errorf("--address and --user are required")
+			return locales.Errorf("cli.addressAndUserRequired")
 		}
 
 		cfg := core.DefaultConfig()
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		applyConfigLanguage(cfg)
 		cfg.AddHost(core.Host{
 			Name:    args[0],
 			Address: address,
@@ -113,14 +117,14 @@ var addHostCmd = &cobra.Command{
 		if err := cfg.Save(); err != nil {
 			return err
 		}
-		fmt.Printf("Host %q added.\n", args[0])
+		fmt.Printf(locales.T("cli.hostAdded")+"\n", args[0])
 		return nil
 	},
 }
 
 var removeHostCmd = &cobra.Command{
 	Use:   "remove-host <name>",
-	Short: "Remove a host",
+	Short: locales.T("cli.removeHost"),
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := sshconfig.EnsureSetup(); err != nil {
@@ -130,18 +134,19 @@ var removeHostCmd = &cobra.Command{
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		applyConfigLanguage(cfg)
 		cfg.RemoveHost(args[0])
 		if err := cfg.Save(); err != nil {
 			return err
 		}
-		fmt.Printf("Host %q removed.\n", args[0])
+		fmt.Printf(locales.T("cli.hostRemoved")+"\n", args[0])
 		return nil
 	},
 }
 
 var connectCmd = &cobra.Command{
 	Use:   "connect <name>",
-	Short: "Connect to a host via SSH",
+	Short: locales.T("cli.connect"),
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := sshconfig.EnsureSetup(); err != nil {
@@ -151,11 +156,12 @@ var connectCmd = &cobra.Command{
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		applyConfigLanguage(cfg)
 		host := cfg.FindHost(args[0])
 		if host == nil {
 			resolved, err := sshconfig.Resolve(args[0])
 			if err != nil {
-				return fmt.Errorf("host %q not found", args[0])
+				return locales.Errorf("cli.hostNotFound", args[0])
 			}
 			host = &resolved
 		}
@@ -165,7 +171,7 @@ var connectCmd = &cobra.Command{
 
 var testCmd = &cobra.Command{
 	Use:   "test <name>",
-	Short: "Test TCP connectivity to a host",
+	Short: locales.T("cli.test"),
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := sshconfig.EnsureSetup(); err != nil {
@@ -175,26 +181,27 @@ var testCmd = &cobra.Command{
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		applyConfigLanguage(cfg)
 		host := cfg.FindHost(args[0])
 		if host == nil {
 			resolved, err := sshconfig.Resolve(args[0])
 			if err != nil {
-				return fmt.Errorf("host %q not found", args[0])
+				return locales.Errorf("cli.hostNotFound", args[0])
 			}
 			host = &resolved
 		}
 		if err := sshutil.TestConnection(*host); err != nil {
-			fmt.Printf("Connection failed: %v\n", err)
+			fmt.Printf(locales.T("cli.connectionFailed")+"\n", err)
 			return err
 		}
-		fmt.Println("Connection OK")
+		fmt.Println(locales.T("cli.connectionOK"))
 		return nil
 	},
 }
 
 var importSSHConfigCmd = &cobra.Command{
 	Use:   "import-ssh-config",
-	Short: "Import hosts from ~/.ssh/config into Wombat",
+	Short: locales.T("cli.importSSHConfig"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := sshconfig.EnsureSetup(); err != nil {
 			return err
@@ -203,13 +210,14 @@ var importSSHConfigCmd = &cobra.Command{
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		applyConfigLanguage(cfg)
 
 		imported, err := sshconfig.ImportFromMainConfig()
 		if err != nil {
 			return err
 		}
 		if len(imported) == 0 {
-			fmt.Println("No importable hosts found in ~/.ssh/config.")
+			fmt.Println(locales.T("cli.noImportableHosts"))
 			return nil
 		}
 
@@ -221,11 +229,11 @@ var importSSHConfigCmd = &cobra.Command{
 		var added int
 		for _, h := range imported {
 			if existing[h.Name] {
-				fmt.Printf("Skipping %q (already exists)\n", h.Name)
+				fmt.Printf(locales.T("cli.skippingExisting")+"\n", h.Name)
 				continue
 			}
 			cfg.AddHost(h)
-			fmt.Printf("Imported %q (%s@%s)\n", h.Name, h.User, h.Address)
+			fmt.Printf(locales.T("cli.importedHost")+"\n", h.Name, h.User, h.Address)
 			added++
 		}
 
@@ -233,9 +241,9 @@ var importSSHConfigCmd = &cobra.Command{
 			if err := cfg.Save(); err != nil {
 				return err
 			}
-			fmt.Printf("Imported %d host(s).\n", added)
+			fmt.Printf(locales.T("cli.importedCount")+"\n", added)
 		} else {
-			fmt.Println("No new hosts to import.")
+			fmt.Println(locales.T("cli.noNewHosts"))
 		}
 		return nil
 	},
@@ -243,7 +251,7 @@ var importSSHConfigCmd = &cobra.Command{
 
 var addTunnelCmd = &cobra.Command{
 	Use:   "add-tunnel <name>",
-	Short: "Add a new tunnel",
+	Short: locales.T("cli.addTunnel"),
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		hostName, _ := cmd.Flags().GetString("host")
@@ -252,7 +260,7 @@ var addTunnelCmd = &cobra.Command{
 		remotePort, _ := cmd.Flags().GetInt("remote-port")
 
 		if hostName == "" || localPort == 0 || remotePort == 0 {
-			return fmt.Errorf("--host, --local-port, and --remote-port are required")
+			return locales.Errorf("cli.hostLocalRemoteRequired")
 		}
 		if remoteHost == "" {
 			remoteHost = "localhost"
@@ -262,6 +270,7 @@ var addTunnelCmd = &cobra.Command{
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		applyConfigLanguage(cfg)
 		cfg.AddTunnel(core.Tunnel{
 			Name:       args[0],
 			HostName:   hostName,
@@ -272,7 +281,7 @@ var addTunnelCmd = &cobra.Command{
 		if err := cfg.Save(); err != nil {
 			return err
 		}
-		fmt.Printf("Tunnel %q added: localhost:%d -> %s:%d via %s\n",
+		fmt.Printf(locales.T("cli.tunnelAdded")+"\n",
 			args[0], localPort, remoteHost, remotePort, hostName)
 		return nil
 	},
@@ -280,28 +289,29 @@ var addTunnelCmd = &cobra.Command{
 
 var removeTunnelCmd = &cobra.Command{
 	Use:   "remove-tunnel <name>",
-	Short: "Remove a tunnel",
+	Short: locales.T("cli.removeTunnel"),
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := core.DefaultConfig()
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		applyConfigLanguage(cfg)
 		if tunnelmgr.IsRunning(args[0]) {
-			return fmt.Errorf("tunnel %q is still running; stop it before removing", args[0])
+			return locales.Errorf("cli.tunnelRunning", args[0])
 		}
 		cfg.RemoveTunnel(args[0])
 		if err := cfg.Save(); err != nil {
 			return err
 		}
-		fmt.Printf("Tunnel %q removed.\n", args[0])
+		fmt.Printf(locales.T("cli.tunnelRemoved")+"\n", args[0])
 		return nil
 	},
 }
 
 var tunnelDaemonCmd = &cobra.Command{
 	Use:    "tunnel-daemon <name>",
-	Short:  "Run a tunnel in the background (internal use)",
+	Short:  locales.T("cli.tunnelDaemon"),
 	Hidden: true,
 	Args:   cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -309,15 +319,16 @@ var tunnelDaemonCmd = &cobra.Command{
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		applyConfigLanguage(cfg)
 		tunnel := cfg.FindTunnel(args[0])
 		if tunnel == nil {
-			return fmt.Errorf("tunnel %q not found", args[0])
+			return locales.Errorf("cli.tunnelNotFound", args[0])
 		}
 		host := cfg.FindHost(tunnel.HostName)
 		if host == nil {
 			resolved, err := sshconfig.Resolve(tunnel.HostName)
 			if err != nil {
-				return fmt.Errorf("host %q for tunnel not found", tunnel.HostName)
+				return locales.Errorf("cli.hostForTunnelNotFound", tunnel.HostName)
 			}
 			host = &resolved
 		}
@@ -325,7 +336,7 @@ var tunnelDaemonCmd = &cobra.Command{
 		// Open log file
 		logFile, err := tunnelmgr.OpenLogFile(tunnel.Name)
 		if err != nil {
-			return fmt.Errorf("open log file: %w", err)
+			return locales.Errorf("errors.openLogFile", err)
 		}
 		defer logFile.Close()
 		log.SetOutput(logFile)
@@ -334,7 +345,7 @@ var tunnelDaemonCmd = &cobra.Command{
 		// Write PID file
 		if err := tunnelmgr.WritePidFile(tunnel.Name); err != nil {
 			log.Printf("ERROR: write PID file: %v", err)
-			return fmt.Errorf("write PID file: %w", err)
+			return locales.Errorf("errors.writePidFile", err)
 		}
 		defer tunnelmgr.RemovePidFile(tunnel.Name)
 
@@ -396,13 +407,14 @@ var tunnelDaemonCmd = &cobra.Command{
 
 var trayDaemonCmd = &cobra.Command{
 	Use:    "tray-daemon",
-	Short:  "Run the system tray daemon (internal use)",
+	Short:  locales.T("cli.trayDaemon"),
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := core.DefaultConfig()
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		applyConfigLanguage(cfg)
 		tray.RunWithTunnels(cfg)
 		return nil
 	},
@@ -410,22 +422,22 @@ var trayDaemonCmd = &cobra.Command{
 
 var tunnelStartCmd = &cobra.Command{
 	Use:   "tunnel-start <name>",
-	Short: "Start a tunnel in the background",
+	Short: locales.T("cli.tunnelStart"),
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		if tunnelmgr.IsRunning(name) {
-			return fmt.Errorf("tunnel %q is already running", name)
+			return locales.Errorf("cli.tunnelAlreadyRunning", name)
 		}
 
 		exe, err := os.Executable()
 		if err != nil {
-			return fmt.Errorf("find executable: %w", err)
+			return locales.Errorf("cli.findExecutable", err)
 		}
 
 		logFile, err := tunnelmgr.OpenLogFile(name)
 		if err != nil {
-			return fmt.Errorf("open log file: %w", err)
+			return locales.Errorf("errors.openLogFile", err)
 		}
 		defer logFile.Close()
 
@@ -435,7 +447,7 @@ var tunnelStartCmd = &cobra.Command{
 		daemonCmd.SysProcAttr = daemonSysProcAttr()
 
 		if err := daemonCmd.Start(); err != nil {
-			return fmt.Errorf("start daemon: %w", err)
+			return locales.Errorf("cli.startDaemon", err)
 		}
 
 		waitCh := make(chan error, 1)
@@ -466,38 +478,38 @@ var tunnelStartCmd = &cobra.Command{
 			_ = logFile.Sync()
 			logData, _ := os.ReadFile(logFile.Name())
 			if len(logData) > 0 {
-				return fmt.Errorf("tunnel %q failed to start; log output:\n%s", name, string(logData))
+				return locales.Errorf("cli.tunnelFailedToStartWithLog", name, string(logData))
 			}
-			return fmt.Errorf("tunnel %q failed to start (see log: %s)", name, logFile.Name())
+			return locales.Errorf("cli.tunnelFailedToStart", name, logFile.Name())
 		}
 
-		fmt.Printf("Tunnel %q started in background (PID %d).\n", name, daemonCmd.Process.Pid)
-		fmt.Printf("Logs: %s\n", logFile.Name())
+		fmt.Printf(locales.T("cli.tunnelStarted")+"\n", name, daemonCmd.Process.Pid)
+		fmt.Printf(locales.T("cli.logs")+"\n", logFile.Name())
 		return nil
 	},
 }
 
 var tunnelStopCmd = &cobra.Command{
 	Use:   "tunnel-stop <name>",
-	Short: "Stop a running tunnel",
+	Short: locales.T("cli.tunnelStop"),
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		if !tunnelmgr.IsRunning(name) {
 			_ = tunnelmgr.RemovePidFile(name)
-			return fmt.Errorf("tunnel %q is not running", name)
+			return locales.Errorf("cli.tunnelNotRunning", name)
 		}
 		if err := tunnelmgr.StopDaemon(name); err != nil {
 			return err
 		}
-		fmt.Printf("Tunnel %q stopped.\n", name)
+		fmt.Printf(locales.T("cli.tunnelStopped")+"\n", name)
 		return nil
 	},
 }
 
 var tunnelRestartCmd = &cobra.Command{
 	Use:   "tunnel-restart <name>",
-	Short: "Restart a tunnel",
+	Short: locales.T("cli.tunnelRestart"),
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
@@ -512,7 +524,7 @@ var tunnelRestartCmd = &cobra.Command{
 
 var tuiCmd = &cobra.Command{
 	Use:   "tui",
-	Short: "Launch the TUI",
+	Short: locales.T("cli.tui"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := sshconfig.EnsureSetup(); err != nil {
 			return err
@@ -521,6 +533,7 @@ var tuiCmd = &cobra.Command{
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		applyConfigLanguage(cfg)
 
 		// Restart tray daemon when opening TUI
 		if cfg.OpenTray {
@@ -538,7 +551,7 @@ var tuiCmd = &cobra.Command{
 		}
 		if m, ok := finalModel.(tui.Model); ok {
 			if m.RestartRequired {
-				fmt.Println("App home changed. Please restart Wombat.")
+				fmt.Println(locales.T("messages.appHomeChanged"))
 				return nil
 			}
 			if m.SelectedHost != nil {
@@ -551,16 +564,17 @@ var tuiCmd = &cobra.Command{
 
 var tunnelListCmd = &cobra.Command{
 	Use:   "tunnel-list",
-	Short: "List all tunnels",
+	Short: locales.T("cli.tunnelList"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := core.DefaultConfig()
 		if err := cfg.Load(); err != nil {
 			return err
 		}
+		applyConfigLanguage(cfg)
 		for _, t := range cfg.Tunnels {
-			status := "inactive"
+			status := locales.T("status.inactive")
 			if tunnelmgr.IsRunning(t.Name) {
-				status = "active"
+				status = locales.T("status.active")
 			}
 			fmt.Printf("%s: %s [%s] localhost:%d -> %s:%d\n",
 				t.Name, t.HostName, status, t.LocalPort, t.RemoteHost, t.RemotePort)
@@ -573,10 +587,19 @@ var version = "dev"
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print version",
+	Short: locales.T("cli.version"),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("wombat %s\n", version)
+		fmt.Printf(locales.T("cli.versionFormat")+"\n", version)
 	},
+}
+
+// applyConfigLanguage sets the active locale from config or system detection.
+func applyConfigLanguage(cfg core.Config) {
+	lang := cfg.Language
+	if lang == "" {
+		lang = locales.DetectLanguage()
+	}
+	_ = locales.SetLanguage(lang)
 }
 
 // startTrayDaemon launches the tray-daemon subcommand in the background.
@@ -609,22 +632,22 @@ func init() {
 		tuiCmd,
 	)
 
-	addHostCmd.Flags().String("address", "", "Host address (required)")
-	addHostCmd.Flags().String("user", "", "SSH user (required)")
-	addHostCmd.Flags().Int("port", 22, "SSH port")
-	addHostCmd.Flags().String("key", "", "Path to private key")
+	addHostCmd.Flags().String("address", "", locales.T("flags.address"))
+	addHostCmd.Flags().String("user", "", locales.T("flags.user"))
+	addHostCmd.Flags().Int("port", 22, locales.T("flags.port"))
+	addHostCmd.Flags().String("key", "", locales.T("flags.key"))
 	_ = addHostCmd.MarkFlagRequired("address")
 	_ = addHostCmd.MarkFlagRequired("user")
 
-	addTunnelCmd.Flags().String("host", "", "SSH host alias to tunnel through (required)")
-	addTunnelCmd.Flags().Int("local-port", 0, "Local port to listen on (required)")
-	addTunnelCmd.Flags().String("remote-host", "localhost", "Remote host to forward to")
-	addTunnelCmd.Flags().Int("remote-port", 0, "Remote port to forward to (required)")
+	addTunnelCmd.Flags().String("host", "", locales.T("flags.host"))
+	addTunnelCmd.Flags().Int("local-port", 0, locales.T("flags.localPort"))
+	addTunnelCmd.Flags().String("remote-host", "localhost", locales.T("flags.remoteHost"))
+	addTunnelCmd.Flags().Int("remote-port", 0, locales.T("flags.remotePort"))
 	_ = addTunnelCmd.MarkFlagRequired("host")
 	_ = addTunnelCmd.MarkFlagRequired("local-port")
 	_ = addTunnelCmd.MarkFlagRequired("remote-port")
 
-	tuiCmd.Flags().String("edit-tunnel", "", "Open TUI directly to the edit form for the named tunnel")
+	tuiCmd.Flags().String("edit-tunnel", "", locales.T("flags.editTunnel"))
 }
 
 // main executes the root Cobra command for the wombat CLI.

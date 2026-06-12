@@ -1,0 +1,223 @@
+{
+  "app": {
+    "title": "Wombat SSH Helper",
+    "subtitle": "Cross-platform SSH helper with TUI and system tray",
+    "shortDescription": "Wombat — a cross-platform SSH helper",
+    "longDescription": "Wombat is a cross-platform SSH helper with TUI and system tray."
+  },
+  "common": {
+    "yes": "yes",
+    "no": "no"
+  },
+  "actions": {
+    "label": "Actions:",
+    "help": "Help",
+    "settings": "Settings",
+    "selectTab": "Select tab",
+    "quit": "Quit"
+  },
+  "tabs": {
+    "tunnels": "Tunnels",
+    "hosts": "SSH Hosts"
+  },
+  "status": {
+    "active": "active",
+    "inactive": "inactive"
+  },
+  "keys": {
+    "navigate": "Navigate",
+    "edit": "Edit",
+    "connect": "Connect",
+    "connectDisconnect": "Connect / Disconnect",
+    "restart": "Restart",
+    "add": "Add",
+    "delete": "Delete",
+    "test": "Test",
+    "testConnection": "Test connection",
+    "save": "save",
+    "cancel": "cancel",
+    "nextField": "next field",
+    "selectHost": "select host",
+    "toggle": "toggle",
+    "confirm": "confirm"
+  },
+  "table": {
+    "columns": {
+      "number": "#",
+      "name": "Name",
+      "host": "Host",
+      "forward": "Forward",
+      "address": "Address",
+      "user": "User",
+      "port": "Port"
+    }
+  },
+  "forms": {
+    "labels": {
+      "name": "Name",
+      "address": "Address",
+      "user": "User",
+      "port": "Port",
+      "keyPath": "Key path",
+      "saveToSSHHosts": "Save to SSH-hosts",
+      "hostAlias": "Host alias",
+      "localPort": "Local port",
+      "remoteHost": "Remote host",
+      "remotePort": "Remote port",
+      "appHomeFolder": "App home folder",
+      "openTrayOnStart": "Open tray on start",
+      "showNotifications": "Show notifications"
+    },
+    "placeholders": {
+      "name": "Name",
+      "address": "Address",
+      "user": "User",
+      "port": "Port",
+      "keyPath": "Key path",
+      "saveToSSHHosts": "Save to SSH-hosts",
+      "hostAlias": "Host alias",
+      "localPort": "Local port",
+      "remoteHost": "Remote host",
+      "remotePort": "Remote port",
+      "appHomeFolder": "App home folder",
+      "openTrayOnStart": "Open tray on start (yes/no)",
+      "showNotifications": "Show notifications (yes/no)"
+    },
+    "help": {
+      "saveEscCancelTab": "[ctrl+s] save  [esc] cancel  [tab] next field",
+      "selectHost": "[enter] select host",
+      "toggle": "[space] toggle"
+    },
+    "titles": {
+      "tunnel": "Tunnel",
+      "host": "Host",
+      "settings": "Settings",
+      "selectSSHHost": "Select SSH host",
+      "selectHostSource": "Select host source"
+    },
+    "options": {
+      "selectExistingHost": "Select from existing SSH hosts",
+      "enterCustomHost": "Enter custom SSH host"
+    }
+  },
+  "help": {
+    "title": "Keyboard Shortcuts",
+    "global": "Global",
+    "tunnels": "Tunnels",
+    "hosts": "SSH Hosts",
+    "goBack": "Press [esc], [?] or [q] to go back"
+  },
+  "dialog": {
+    "deleteTitle": "Delete %s %q?",
+    "confirm": " confirm  ",
+    "cancel": " cancel"
+  },
+  "messages": {
+    "noHostsConfigured": "No hosts configured.",
+    "tunnelStarted": "Tunnel %s started",
+    "tunnelStopped": "Tunnel %s stopped",
+    "tunnelRestarted": "Tunnel %s restarted",
+    "failedToStart": "Failed to start %s: %v",
+    "failedToStop": "Failed to stop %s: %v",
+    "failedToRestart": "Failed to restart %s: %v",
+    "connectionOK": "%s: connection OK",
+    "connectionFailed": "%s: connection failed",
+    "appHomeMoved": "App home moved to %s — restart required",
+    "appHomeChanged": "App home changed. Please restart Wombat."
+  },
+  "tray": {
+    "title": "Wombat SSH Helper",
+    "start": "Start",
+    "stop": "Stop",
+    "restart": "Restart",
+    "openLogs": "Open logs",
+    "edit": "Edit",
+    "openApp": "Open app",
+    "testNotification": "Test Notification",
+    "testNotificationBody": "Hello from the tray!",
+    "quit": "Quit",
+    "stopBeforeQuit": "Stop %d active tunnel(s) before quitting?",
+    "yes": "Yes",
+    "no": "No",
+    "activeTooltip": "%s active (%s)",
+    "activeCountTooltip": "%d tunnels active",
+    "failed": "Tray failed: %v",
+    "binaryNotFound": "Could not locate wombat binary. Please place it in a directory listed in your PATH.",
+    "failedOpenTerminal": "Failed to open Terminal: %v",
+    "failedOpenTUI": "Failed to open TUI: %v",
+    "failedGetLogPath": "Failed to get log path: %v",
+    "noLogsYet": "No logs for tunnel %s yet",
+    "failedOpenLog": "Failed to open log: %v"
+  },
+  "cli": {
+    "listHosts": "List configured hosts",
+    "addHost": "Add a new host",
+    "removeHost": "Remove a host",
+    "connect": "Connect to a host via SSH",
+    "test": "Test TCP connectivity to a host",
+    "importSSHConfig": "Import hosts from ~/.ssh/config into Wombat",
+    "addTunnel": "Add a new tunnel",
+    "removeTunnel": "Remove a tunnel",
+    "tunnelDaemon": "Run a tunnel in the background (internal use)",
+    "trayDaemon": "Run the system tray daemon (internal use)",
+    "tunnelStart": "Start a tunnel in the background",
+    "tunnelStop": "Stop a running tunnel",
+    "tunnelRestart": "Restart a tunnel",
+    "tui": "Launch the TUI",
+    "tunnelList": "List all tunnels",
+    "version": "Print version",
+    "hostAdded": "Host %q added.",
+    "hostRemoved": "Host %q removed.",
+    "hostNotFound": "host %q not found",
+    "connectionFailed": "Connection failed: %v",
+    "connectionOK": "Connection OK",
+    "noImportableHosts": "No importable hosts found in ~/.ssh/config.",
+    "skippingExisting": "Skipping %q (already exists)",
+    "importedHost": "Imported %q (%s@%s)",
+    "importedCount": "Imported %d host(s).",
+    "noNewHosts": "No new hosts to import.",
+    "tunnelAdded": "Tunnel %q added: localhost:%d -> %s:%d via %s",
+    "tunnelRunning": "tunnel %q is still running; stop it before removing",
+    "tunnelRemoved": "Tunnel %q removed.",
+    "tunnelNotFound": "tunnel %q not found",
+    "hostForTunnelNotFound": "host %q for tunnel not found",
+    "tunnelFailedToStartWithLog": "tunnel %q failed to start; log output:\n%s",
+    "tunnelFailedToStart": "tunnel %q failed to start (see log: %s)",
+    "tunnelStarted": "Tunnel %q started in background (PID %d).",
+    "logs": "Logs: %s",
+    "tunnelNotRunning": "tunnel %q is not running",
+    "tunnelStopped": "Tunnel %q stopped.",
+    "tunnelAlreadyRunning": "tunnel %q is already running",
+    "addressAndUserRequired": "--address and --user are required",
+    "hostLocalRemoteRequired": "--host, --local-port, and --remote-port are required",
+    "findExecutable": "find executable: %w",
+    "startDaemon": "start daemon: %w",
+    "versionFormat": "wombat %s"
+  },
+  "flags": {
+    "address": "Host address (required)",
+    "user": "SSH user (required)",
+    "port": "SSH port",
+    "key": "Path to private key",
+    "host": "SSH host alias to tunnel through (required)",
+    "localPort": "Local port to listen on (required)",
+    "remoteHost": "Remote host to forward to",
+    "remotePort": "Remote port to forward to (required)",
+    "editTunnel": "Open TUI directly to the edit form for the named tunnel"
+  },
+  "errors": {
+    "trayDaemonNotRunning": "tray daemon is not running",
+    "invalidTrayPid": "invalid tray PID file",
+    "trayProcessNotFound": "tray daemon process not found",
+    "keepaliveTimedOut": "keepalive timed out",
+    "noAuthMethods": "no authentication methods available",
+    "openLogFile": "open log file: %w",
+    "writePidFile": "write PID file: %w",
+    "appHomeEmpty": "app home folder cannot be empty",
+    "setAppHome": "failed to set app home: %w",
+    "allFieldsRequired": "all fields are required",
+    "nameAddressUserRequired": "name, address and user are required",
+    "invalidPort": "invalid port: %v",
+    "portRange": "port must be between 1 and 65535"
+  }
+}

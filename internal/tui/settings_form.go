@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/niklucky/wombat/internal/core"
+	"github.com/niklucky/wombat/internal/locales"
 	"github.com/niklucky/wombat/internal/notify"
 	"github.com/niklucky/wombat/internal/tunnelmgr"
 )
@@ -20,35 +21,43 @@ func (m *Model) initSettingsForm() {
 	home, _ := core.AppHome()
 
 	inputs := make([]textinput.Model, 3)
-	placeholders := []string{"App home folder", "Open tray on start (yes/no)", "Show notifications (yes/no)"}
-	values := []string{
-		home,
-		boolToYesNo(m.config.OpenTray),
-		boolToYesNo(m.config.ShowNotify),
+	bools := make([]bool, 3)
+	placeholders := []string{
+		locales.T("forms.placeholders.appHomeFolder"),
+		locales.T("forms.placeholders.openTrayOnStart"),
+		locales.T("forms.placeholders.showNotifications"),
 	}
+	bools[1] = m.config.OpenTray
+	bools[2] = m.config.ShowNotify
 
 	for i := range inputs {
 		inputs[i] = textinput.New()
 		inputs[i].Placeholder = placeholders[i]
-		inputs[i].SetValue(values[i])
+		if i == 1 || i == 2 {
+			inputs[i].SetValue(boolToYesNo(bools[i]))
+		} else {
+			inputs[i].SetValue(home)
+		}
 		inputs[i].CharLimit = 100
 		inputs[i].Width = 50
 	}
 	inputs[0].Focus()
 
 	m.formInputs = inputs
+	m.formBools = bools
 }
 
 func boolToYesNo(v bool) string {
 	if v {
-		return "yes"
+		return locales.T("common.yes")
 	}
-	return "no"
+	return locales.T("common.no")
 }
 
 func yesNoToBool(s string) bool {
 	lower := strings.ToLower(strings.TrimSpace(s))
-	return lower == "yes" || lower == "y" || lower == "true"
+	return lower == "yes" || lower == "y" || lower == "true" ||
+		lower == strings.ToLower(locales.T("common.yes"))
 }
 
 func (m *Model) settingsFormUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -78,6 +87,13 @@ func (m *Model) settingsFormUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.formFocus = len(m.formInputs) - 1
 			}
 			m.updateFormFocus()
+		case " ":
+			if m.formFocus == 1 || m.formFocus == 2 {
+				m.formBools[m.formFocus] = !m.formBools[m.formFocus]
+				m.formInputs[m.formFocus].SetValue(boolToYesNo(m.formBools[m.formFocus]))
+				return m, nil
+			}
+			m.formInputs[m.formFocus], _ = m.formInputs[m.formFocus].Update(msg)
 		default:
 			m.formInputs[m.formFocus], _ = m.formInputs[m.formFocus].Update(msg)
 		}
@@ -87,11 +103,11 @@ func (m *Model) settingsFormUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *Model) saveSettingsForm() (bool, error) {
 	newHome := strings.TrimSpace(m.formInputs[0].Value())
-	openTray := yesNoToBool(m.formInputs[1].Value())
-	showNotify := yesNoToBool(m.formInputs[2].Value())
+	openTray := m.formBools[1]
+	showNotify := m.formBools[2]
 
 	if newHome == "" {
-		return false, fmt.Errorf("app home folder cannot be empty")
+		return false, locales.Errorf("errors.appHomeEmpty")
 	}
 
 	oldHome, _ := core.AppHome()
@@ -118,10 +134,10 @@ func (m *Model) saveSettingsForm() (bool, error) {
 
 		// Update pointer
 		if err := core.SetAppHome(newHome); err != nil {
-			return false, fmt.Errorf("failed to set app home: %w", err)
+			return false, locales.Errorf("errors.setAppHome", err)
 		}
 
-		notify.Notify("Wombat", fmt.Sprintf("App home moved to %s — restart required", newHome))
+		notify.Notify(locales.T("app.title"), fmt.Sprintf(locales.T("messages.appHomeMoved"), newHome))
 	}
 
 	m.config.OpenTray = openTray
@@ -131,9 +147,13 @@ func (m *Model) saveSettingsForm() (bool, error) {
 }
 
 func (m *Model) settingsFormView() string {
-	labels := []string{"App home folder", "Open tray on start", "Show notifications"}
+	labels := []string{
+		locales.T("forms.labels.appHomeFolder"),
+		locales.T("forms.labels.openTrayOnStart"),
+		locales.T("forms.labels.showNotifications"),
+	}
 
-	s := formLabelStyle.Render("Settings") + "\n\n"
+	s := formLabelStyle.Render(locales.T("forms.titles.settings")) + "\n\n"
 	for i := range m.formInputs {
 		cursor := "  "
 		if i == m.formFocus {
@@ -142,6 +162,10 @@ func (m *Model) settingsFormView() string {
 		s += cursor + formLabelStyle.Render(labels[i]) + "\n"
 		s += "  " + m.formInputs[i].View() + "\n\n"
 	}
-	s += formHelpStyle.Render("[ctrl+s] save  [esc] cancel  [tab] next field")
+	help := locales.T("forms.help.saveEscCancelTab")
+	if m.formFocus == 1 || m.formFocus == 2 {
+		help += "  " + locales.T("forms.help.toggle")
+	}
+	s += formHelpStyle.Render(help)
 	return s
 }

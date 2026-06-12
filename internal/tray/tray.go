@@ -14,6 +14,7 @@ import (
 	"github.com/gogpu/systray"
 	"github.com/niklucky/wombat/assets"
 	"github.com/niklucky/wombat/internal/core"
+	"github.com/niklucky/wombat/internal/locales"
 	"github.com/niklucky/wombat/internal/notify"
 	"github.com/niklucky/wombat/internal/tunnelmgr"
 )
@@ -55,7 +56,7 @@ func RunWithTunnels(cfg core.Config) {
 
 	if err := tray.Run(); err != nil {
 		log.Printf("tray.Run failed: %v", err)
-		_ = notify.Alert("Wombat", fmt.Sprintf("Tray failed: %v", err))
+		_ = notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("tray.failed"), err))
 	}
 	_ = tunnelmgr.RemoveTrayPidFile()
 }
@@ -74,21 +75,21 @@ func buildMenu(tray *systray.SystemTray, cfg core.Config, refresh func()) *systr
 		label := tunnelLabel(name, running, elapsed)
 		submenu := systray.NewMenu()
 
-		actionLabel := "Start"
+		actionLabel := locales.T("tray.start")
 		if running {
-			actionLabel = "Stop"
+			actionLabel = locales.T("tray.stop")
 		}
 
 		submenu.Add(actionLabel, func() {
 			toggleTunnel(name, refresh)
 		})
-		submenu.Add("Restart", func() {
+		submenu.Add(locales.T("tray.restart"), func() {
 			restartTunnel(name, refresh)
 		})
-		submenu.Add("Open logs", func() {
+		submenu.Add(locales.T("tray.openLogs"), func() {
 			openTunnelLog(name)
 		})
-		submenu.Add("Edit", func() {
+		submenu.Add(locales.T("tray.edit"), func() {
 			launchTUI(name)
 		})
 
@@ -96,18 +97,18 @@ func buildMenu(tray *systray.SystemTray, cfg core.Config, refresh func()) *systr
 	}
 
 	menu.AddSeparator()
-	menu.Add("Open app", func() {
+	menu.Add(locales.T("tray.openApp"), func() {
 		launchTUI("")
 	})
-	menu.Add("Test Notification", func() {
-		_ = notify.Notify("Wombat", "Hello from the tray!")
+	menu.Add(locales.T("tray.testNotification"), func() {
+		_ = notify.Notify(locales.T("app.title"), locales.T("tray.testNotificationBody"))
 	})
 	menu.AddSeparator()
-	menu.Add("Quit", func() {
+	menu.Add(locales.T("tray.quit"), func() {
 		active := activeTunnels(cfg)
 		if len(active) > 0 {
-			msg := fmt.Sprintf("Stop %d active tunnel(s) before quitting?", len(active))
-			if askYesNo("Wombat", msg) {
+			msg := fmt.Sprintf(locales.T("tray.stopBeforeQuit"), len(active))
+			if askYesNo(locales.T("app.title"), msg) {
 				for _, n := range active {
 					_ = tunnelmgr.StopDaemon(n)
 					_ = tunnelmgr.RemoveLogFile(n)
@@ -127,17 +128,17 @@ func toggleTunnel(name string, refresh func()) {
 	if running {
 		if err := tunnelmgr.StopDaemon(name); err == nil {
 			_ = tunnelmgr.RemoveLogFile(name)
-			_ = notify.Notify("Wombat", fmt.Sprintf("Tunnel %s stopped", name))
+			_ = notify.Notify(locales.T("app.title"), fmt.Sprintf(locales.T("messages.tunnelStopped"), name))
 			refresh()
 		} else {
 			log.Printf("failed to stop tunnel %s: %v", name, err)
-			_ = notify.Notify("Wombat", fmt.Sprintf("Failed to stop tunnel %s: %v", name, err))
+			_ = notify.Notify(locales.T("app.title"), fmt.Sprintf(locales.T("messages.failedToStop"), name, err))
 		}
 	} else {
 		if err := startTunnelProcess(name); err != nil {
-			_ = notify.Alert("Wombat", fmt.Sprintf("Failed to start tunnel %s: %v", name, err))
+			_ = notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("messages.failedToStart"), name, err))
 		} else {
-			_ = notify.Notify("Wombat", fmt.Sprintf("Tunnel %s started", name))
+			_ = notify.Notify(locales.T("app.title"), fmt.Sprintf(locales.T("messages.tunnelStarted"), name))
 			refresh()
 		}
 	}
@@ -145,9 +146,9 @@ func toggleTunnel(name string, refresh func()) {
 
 func restartTunnel(name string, refresh func()) {
 	if err := tunnelmgr.RestartTunnel(name, startTunnelProcess); err != nil {
-		_ = notify.Alert("Wombat", fmt.Sprintf("Failed to restart tunnel %s: %v", name, err))
+		_ = notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("messages.failedToRestart"), name, err))
 	} else {
-		_ = notify.Notify("Wombat", fmt.Sprintf("Tunnel %s restarted", name))
+		_ = notify.Notify(locales.T("app.title"), fmt.Sprintf(locales.T("messages.tunnelRestarted"), name))
 		refresh()
 	}
 }
@@ -166,15 +167,15 @@ func updateTooltip(tray *systray.SystemTray, cfg core.Config) {
 	count := len(active)
 
 	if count == 0 {
-		tray.SetTooltip("Wombat SSH Helper")
+		tray.SetTooltip(locales.T("tray.title"))
 		return
 	}
 	if count == 1 {
 		elapsed := tunnelElapsed(active[0])
-		tray.SetTooltip(fmt.Sprintf("%s active (%s)", active[0], elapsed))
+		tray.SetTooltip(fmt.Sprintf(locales.T("tray.activeTooltip"), active[0], elapsed))
 		return
 	}
-	tray.SetTooltip(fmt.Sprintf("%d tunnels active", count))
+	tray.SetTooltip(fmt.Sprintf(locales.T("tray.activeCountTooltip"), count))
 }
 
 func tunnelLabel(name string, active bool, elapsed string) string {
@@ -222,15 +223,15 @@ func tunnelElapsed(name string) string {
 func openTunnelLog(name string) {
 	path, err := tunnelmgr.LogFilePath(name)
 	if err != nil {
-		_ = notify.Alert("Wombat", fmt.Sprintf("Failed to get log path: %v", err))
+		_ = notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("tray.failedGetLogPath"), err))
 		return
 	}
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		_ = notify.Alert("Wombat", fmt.Sprintf("No logs for tunnel %s yet", name))
+		_ = notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("tray.noLogsYet"), name))
 		return
 	}
 	if err := openFile(path); err != nil {
-		_ = notify.Alert("Wombat", fmt.Sprintf("Failed to open log: %v", err))
+		_ = notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("tray.failedOpenLog"), err))
 	}
 }
 
@@ -248,7 +249,7 @@ func launchTUI(editTunnel string) {
 		exe, err = exec.LookPath("wombat")
 		if err != nil {
 			log.Printf("launchTUI: could not locate wombat binary")
-			_ = notify.Alert("Wombat", "Could not locate wombat binary. Please place it in a directory listed in your PATH.")
+			_ = notify.Alert(locales.T("app.title"), locales.T("tray.binaryNotFound"))
 			return
 		}
 	}
@@ -267,7 +268,7 @@ func launchTUI(editTunnel string) {
 		script := fmt.Sprintf(`tell application "Terminal" to do script %q`, cmdStr)
 		if err := exec.CommandContext(ctx, "osascript", "-e", script).Start(); err != nil {
 			log.Printf("launchTUI: failed to open Terminal: %v", err)
-			_ = notify.Alert("Wombat", fmt.Sprintf("Failed to open Terminal: %v", err))
+			_ = notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("tray.failedOpenTerminal"), err))
 			return
 		}
 		_ = exec.CommandContext(ctx, "osascript", "-e", `tell application "Terminal" to activate`).Start()
@@ -295,19 +296,19 @@ func launchTUI(editTunnel string) {
 		cmd := exec.CommandContext(ctx, exe, args...)
 		if err := cmd.Start(); err != nil {
 			log.Printf("launchTUI: failed to start TUI: %v", err)
-			_ = notify.Alert("Wombat", fmt.Sprintf("Failed to open TUI: %v", err))
+			_ = notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("tray.failedOpenTUI"), err))
 		}
 	case "windows":
 		cmd := exec.CommandContext(ctx, "cmd", append([]string{"/c", "start", "", exe}, args...)...)
 		if err := cmd.Start(); err != nil {
 			log.Printf("launchTUI: failed to start TUI: %v", err)
-			_ = notify.Alert("Wombat", fmt.Sprintf("Failed to open TUI: %v", err))
+			_ = notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("tray.failedOpenTUI"), err))
 		}
 	default:
 		cmd := exec.CommandContext(ctx, exe, args...)
 		if err := cmd.Start(); err != nil {
 			log.Printf("launchTUI: failed to start TUI: %v", err)
-			_ = notify.Alert("Wombat", fmt.Sprintf("Failed to open TUI: %v", err))
+			_ = notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("tray.failedOpenTUI"), err))
 		}
 	}
 }
@@ -330,9 +331,11 @@ func openFile(path string) error {
 func askYesNo(title, message string) bool {
 	switch runtime.GOOS {
 	case "darwin":
-		script := fmt.Sprintf(`display dialog %q buttons {"Yes", "No"} default button "No" with title %q`, message, title)
+		yes := locales.T("tray.yes")
+		no := locales.T("tray.no")
+		script := fmt.Sprintf(`display dialog %q buttons {%q, %q} default button %q with title %q`, message, yes, no, no, title)
 		out, err := exec.Command("osascript", "-e", script).Output()
-		return err == nil && strings.Contains(string(out), "Yes")
+		return err == nil && strings.Contains(string(out), yes)
 	case "linux":
 		cmd := exec.Command("zenity", "--question", "--title", title, "--text", message)
 		err := cmd.Run()

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/niklucky/wombat/internal/core"
+	"github.com/niklucky/wombat/internal/locales"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -83,7 +84,7 @@ func sendKeepalive(client *ssh.Client) error {
 	case err := <-done:
 		return err
 	case <-time.After(10 * time.Second):
-		return fmt.Errorf("keepalive timed out")
+		return locales.Errorf("errors.keepaliveTimedOut")
 	}
 }
 
@@ -130,7 +131,7 @@ func collectAuthMethods(host core.Host) ([]ssh.AuthMethod, error) {
 	}
 
 	if len(methods) == 0 {
-		return nil, fmt.Errorf("no authentication methods available")
+		return nil, locales.Errorf("errors.noAuthMethods")
 	}
 	return methods, nil
 }

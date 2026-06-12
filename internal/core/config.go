@@ -14,6 +14,7 @@ import (
 type Config struct {
 	OpenTray     bool            `json:"open_tray"`
 	ShowNotify   bool            `json:"show_notifications"`
+	Language     string          `json:"language,omitempty"`
 	Hosts        []models.Host   `json:"-"`
 	Keys         []models.Key    `json:"keys"`
 	Tunnels      []models.Tunnel `json:"tunnels"`
@@ -83,11 +84,13 @@ func (c *Config) Save() error {
 	jsonCfg := struct {
 		OpenTray   bool            `json:"open_tray"`
 		ShowNotify bool            `json:"show_notifications"`
+		Language   string          `json:"language,omitempty"`
 		Keys       []models.Key    `json:"keys"`
 		Tunnels    []models.Tunnel `json:"tunnels"`
 	}{
 		OpenTray:   c.OpenTray,
 		ShowNotify: c.ShowNotify,
+		Language:   c.Language,
 		Keys:       c.Keys,
 		Tunnels:    c.Tunnels,
 	}

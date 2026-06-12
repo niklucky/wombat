@@ -2,6 +2,7 @@ package tui
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/niklucky/wombat/internal/locales"
 )
 
 func (m *Model) hostSourceUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -39,9 +40,12 @@ func (m *Model) hostSourceUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) hostSourceView() string {
-	options := []string{"Select from existing SSH hosts", "Enter custom SSH host"}
+	options := []string{
+		locales.T("forms.options.selectExistingHost"),
+		locales.T("forms.options.enterCustomHost"),
+	}
 
-	s := formLabelStyle.Render("Select host source") + "\n\n"
+	s := formLabelStyle.Render(locales.T("forms.titles.selectHostSource")) + "\n\n"
 	for i, opt := range options {
 		cursor := "  "
 		if i == m.hostSourceCursor {
@@ -49,6 +53,6 @@ func (m *Model) hostSourceView() string {
 		}
 		s += cursor + opt + "\n"
 	}
-	s += "\n" + formHelpStyle.Render("[↑/↓] navigate  [↵] select  [esc] cancel")
+	s += "\n" + formHelpStyle.Render("[↑/↓] "+locales.T("keys.navigate")+"  [↵] "+locales.T("keys.selectHost")+"  [esc] "+locales.T("keys.cancel"))
 	return s
 }

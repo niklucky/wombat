@@ -1,0 +1,223 @@
+{
+  "app": {
+    "title": "Wombat SSH Helper",
+    "subtitle": "Asistente SSH multiplataforma con TUI y bandeja del sistema",
+    "shortDescription": "Wombat — asistente SSH multiplataforma",
+    "longDescription": "Wombat es un asistente SSH multiplataforma con TUI y bandeja del sistema."
+  },
+  "common": {
+    "yes": "sí",
+    "no": "no"
+  },
+  "actions": {
+    "label": "Acciones:",
+    "help": "Ayuda",
+    "settings": "Configuración",
+    "selectTab": "Seleccionar pestaña",
+    "quit": "Salir"
+  },
+  "tabs": {
+    "tunnels": "Túneles",
+    "hosts": "Hosts SSH"
+  },
+  "status": {
+    "active": "activo",
+    "inactive": "inactivo"
+  },
+  "keys": {
+    "navigate": "Navegar",
+    "edit": "Editar",
+    "connect": "Conectar",
+    "connectDisconnect": "Conectar / Desconectar",
+    "restart": "Reiniciar",
+    "add": "Agregar",
+    "delete": "Eliminar",
+    "test": "Probar",
+    "testConnection": "Probar conexión",
+    "save": "guardar",
+    "cancel": "cancelar",
+    "nextField": "siguiente campo",
+    "selectHost": "seleccionar host",
+    "toggle": "alternar",
+    "confirm": "confirmar"
+  },
+  "table": {
+    "columns": {
+      "number": "#",
+      "name": "Nombre",
+      "host": "Host",
+      "forward": "Redirección",
+      "address": "Dirección",
+      "user": "Usuario",
+      "port": "Puerto"
+    }
+  },
+  "forms": {
+    "labels": {
+      "name": "Nombre",
+      "address": "Dirección",
+      "user": "Usuario",
+      "port": "Puerto",
+      "keyPath": "Ruta de la clave",
+      "saveToSSHHosts": "Guardar en hosts SSH",
+      "hostAlias": "Alias del host",
+      "localPort": "Puerto local",
+      "remoteHost": "Host remoto",
+      "remotePort": "Puerto remoto",
+      "appHomeFolder": "Carpeta de inicio de la aplicación",
+      "openTrayOnStart": "Abrir bandeja al iniciar",
+      "showNotifications": "Mostrar notificaciones"
+    },
+    "placeholders": {
+      "name": "Nombre",
+      "address": "Dirección",
+      "user": "Usuario",
+      "port": "Puerto",
+      "keyPath": "Ruta de la clave",
+      "saveToSSHHosts": "Guardar en hosts SSH",
+      "hostAlias": "Alias del host",
+      "localPort": "Puerto local",
+      "remoteHost": "Host remoto",
+      "remotePort": "Puerto remoto",
+      "appHomeFolder": "Carpeta de inicio de la aplicación",
+      "openTrayOnStart": "Abrir bandeja al iniciar (sí/no)",
+      "showNotifications": "Mostrar notificaciones (sí/no)"
+    },
+    "help": {
+      "saveEscCancelTab": "[ctrl+s] guardar  [esc] cancelar  [tab] siguiente campo",
+      "selectHost": "[enter] seleccionar host",
+      "toggle": "[space] alternar"
+    },
+    "titles": {
+      "tunnel": "Túnel",
+      "host": "Host",
+      "settings": "Configuración",
+      "selectSSHHost": "Seleccionar host SSH",
+      "selectHostSource": "Seleccionar fuente del host"
+    },
+    "options": {
+      "selectExistingHost": "Seleccionar de hosts SSH existentes",
+      "enterCustomHost": "Ingresar host SSH personalizado"
+    }
+  },
+  "help": {
+    "title": "Atajos de teclado",
+    "global": "Globales",
+    "tunnels": "Túneles",
+    "hosts": "Hosts SSH",
+    "goBack": "Presione [esc], [?] o [q] para volver"
+  },
+  "dialog": {
+    "deleteTitle": "¿Eliminar %s %q?",
+    "confirm": " confirmar  ",
+    "cancel": " cancelar"
+  },
+  "messages": {
+    "noHostsConfigured": "No hay hosts configurados.",
+    "tunnelStarted": "Túnel %s iniciado",
+    "tunnelStopped": "Túnel %s detenido",
+    "tunnelRestarted": "Túnel %s reiniciado",
+    "failedToStart": "Error al iniciar %s: %v",
+    "failedToStop": "Error al detener %s: %v",
+    "failedToRestart": "Error al reiniciar %s: %v",
+    "connectionOK": "%s: conexión OK",
+    "connectionFailed": "%s: conexión fallida",
+    "appHomeMoved": "Carpeta de inicio movida a %s — se requiere reinicio",
+    "appHomeChanged": "Carpeta de inicio cambiada. Reinicie Wombat."
+  },
+  "tray": {
+    "title": "Wombat SSH Helper",
+    "start": "Iniciar",
+    "stop": "Detener",
+    "restart": "Reiniciar",
+    "openLogs": "Abrir registros",
+    "edit": "Editar",
+    "openApp": "Abrir aplicación",
+    "testNotification": "Notificación de prueba",
+    "testNotificationBody": "¡Hola desde la bandeja!",
+    "quit": "Salir",
+    "stopBeforeQuit": "¿Detener %d túnel(es) activo(s) antes de salir?",
+    "yes": "Sí",
+    "no": "No",
+    "activeTooltip": "%s activo (%s)",
+    "activeCountTooltip": "%d túneles activos",
+    "failed": "Error de la bandeja: %v",
+    "binaryNotFound": "No se pudo ubicar el binario de wombat. Colóquelo en un directorio de su PATH.",
+    "failedOpenTerminal": "Error al abrir Terminal: %v",
+    "failedOpenTUI": "Error al abrir TUI: %v",
+    "failedGetLogPath": "Error al obtener la ruta del registro: %v",
+    "noLogsYet": "Aún no hay registros para el túnel %s",
+    "failedOpenLog": "Error al abrir el registro: %v"
+  },
+  "cli": {
+    "listHosts": "Listar hosts configurados",
+    "addHost": "Agregar un host nuevo",
+    "removeHost": "Eliminar un host",
+    "connect": "Conectarse a un host vía SSH",
+    "test": "Probar conectividad TCP con un host",
+    "importSSHConfig": "Importar hosts de ~/.ssh/config a Wombat",
+    "addTunnel": "Agregar un túnel nuevo",
+    "removeTunnel": "Eliminar un túnel",
+    "tunnelDaemon": "Ejecutar un túnel en segundo plano (uso interno)",
+    "trayDaemon": "Ejecutar el demonio de la bandeja (uso interno)",
+    "tunnelStart": "Iniciar un túnel en segundo plano",
+    "tunnelStop": "Detener un túnel en ejecución",
+    "tunnelRestart": "Reiniciar un túnel",
+    "tui": "Iniciar el TUI",
+    "tunnelList": "Listar todos los túneles",
+    "version": "Mostrar versión",
+    "hostAdded": "Host %q agregado.",
+    "hostRemoved": "Host %q eliminado.",
+    "hostNotFound": "host %q no encontrado",
+    "connectionFailed": "Conexión fallida: %v",
+    "connectionOK": "Conexión OK",
+    "noImportableHosts": "No se encontraron hosts importables en ~/.ssh/config.",
+    "skippingExisting": "Omitiendo %q (ya existe)",
+    "importedHost": "Importado %q (%s@%s)",
+    "importedCount": "%d host(s) importado(s).",
+    "noNewHosts": "No hay hosts nuevos para importar.",
+    "tunnelAdded": "Túnel %q agregado: localhost:%d -> %s:%d vía %s",
+    "tunnelRunning": "el túnel %q aún está en ejecución; deténgalo antes de eliminarlo",
+    "tunnelRemoved": "Túnel %q eliminado.",
+    "tunnelNotFound": "túnel %q no encontrado",
+    "hostForTunnelNotFound": "host %q para el túnel no encontrado",
+    "tunnelFailedToStartWithLog": "error al iniciar el túnel %q; salida del registro:\n%s",
+    "tunnelFailedToStart": "error al iniciar el túnel %q (ver registro: %s)",
+    "tunnelStarted": "Túnel %q iniciado en segundo plano (PID %d).",
+    "logs": "Registros: %s",
+    "tunnelNotRunning": "el túnel %q no está en ejecución",
+    "tunnelStopped": "Túnel %q detenido.",
+    "tunnelAlreadyRunning": "el túnel %q ya está en ejecución",
+    "addressAndUserRequired": "--address y --user son obligatorios",
+    "hostLocalRemoteRequired": "--host, --local-port y --remote-port son obligatorios",
+    "findExecutable": "buscar ejecutable: %w",
+    "startDaemon": "iniciar demonio: %w",
+    "versionFormat": "wombat %s"
+  },
+  "flags": {
+    "address": "Dirección del host (obligatorio)",
+    "user": "Usuario SSH (obligatorio)",
+    "port": "Puerto SSH",
+    "key": "Ruta a la clave privada",
+    "host": "Alias del host SSH para el túnel (obligatorio)",
+    "localPort": "Puerto local para escuchar (obligatorio)",
+    "remoteHost": "Host remoto al que redirigir",
+    "remotePort": "Puerto remoto al que redirigir (obligatorio)",
+    "editTunnel": "Abrir el TUI directamente en el formulario de edición del túnel nombrado"
+  },
+  "errors": {
+    "trayDaemonNotRunning": "el demonio de la bandeja no está en ejecución",
+    "invalidTrayPid": "archivo PID de la bandeja inválido",
+    "trayProcessNotFound": "proceso del demonio de la bandeja no encontrado",
+    "keepaliveTimedOut": "keepalive agotado",
+    "noAuthMethods": "no hay métodos de autenticación disponibles",
+    "openLogFile": "abrir archivo de registro: %w",
+    "writePidFile": "escribir archivo PID: %w",
+    "appHomeEmpty": "la carpeta de inicio de la aplicación no puede estar vacía",
+    "setAppHome": "error al establecer la carpeta de inicio: %w",
+    "allFieldsRequired": "todos los campos son obligatorios",
+    "nameAddressUserRequired": "el nombre, la dirección y el usuario son obligatorios",
+    "invalidPort": "puerto inválido: %v",
+    "portRange": "el puerto debe estar entre 1 y 65535"
+  }
+}
