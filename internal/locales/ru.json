@@ -1,0 +1,219 @@
+{
+  "app": {
+    "title": "Wombat SSH Helper",
+    "subtitle": "Кроссплатформенный SSH-помощник с TUI и системным треем",
+    "shortDescription": "Wombat — кроссплатформенный SSH-помощник",
+    "longDescription": "Wombat — кроссплатформенный SSH-помощник с TUI и системным треем."
+  },
+  "actions": {
+    "label": "Действия:",
+    "help": "Помощь",
+    "settings": "Настройки",
+    "selectTab": "Выбрать вкладку",
+    "quit": "Выход"
+  },
+  "tabs": {
+    "tunnels": "Туннели",
+    "hosts": "SSH-хосты"
+  },
+  "status": {
+    "active": "активен",
+    "inactive": "неактивен"
+  },
+  "keys": {
+    "navigate": "Навигация",
+    "edit": "Редактировать",
+    "connect": "Подключиться",
+    "connectDisconnect": "Подключить / Отключить",
+    "restart": "Перезапустить",
+    "add": "Добавить",
+    "delete": "Удалить",
+    "test": "Проверить",
+    "testConnection": "Проверить соединение",
+    "save": "сохранить",
+    "cancel": "отмена",
+    "nextField": "следующее поле",
+    "selectHost": "выбрать хост",
+    "toggle": "переключить",
+    "confirm": "подтвердить"
+  },
+  "table": {
+    "columns": {
+      "number": "#",
+      "name": "Название",
+      "host": "Хост",
+      "forward": "Перенаправление",
+      "address": "Адрес",
+      "user": "Пользователь",
+      "port": "Порт"
+    }
+  },
+  "forms": {
+    "labels": {
+      "name": "Название",
+      "address": "Адрес",
+      "user": "Пользователь",
+      "port": "Порт",
+      "keyPath": "Путь к ключу",
+      "saveToSSHHosts": "Сохранить в SSH-хосты",
+      "hostAlias": "Алиас хоста",
+      "localPort": "Локальный порт",
+      "remoteHost": "Удалённый хост",
+      "remotePort": "Удалённый порт",
+      "appHomeFolder": "Домашняя папка приложения",
+      "openTrayOnStart": "Открывать трей при запуске",
+      "showNotifications": "Показывать уведомления"
+    },
+    "placeholders": {
+      "name": "Название",
+      "address": "Адрес",
+      "user": "Пользователь",
+      "port": "Порт",
+      "keyPath": "Путь к ключу",
+      "saveToSSHHosts": "Сохранить в SSH-хосты",
+      "hostAlias": "Алиас хоста",
+      "localPort": "Локальный порт",
+      "remoteHost": "Удалённый хост",
+      "remotePort": "Удалённый порт",
+      "appHomeFolder": "Домашняя папка приложения",
+      "openTrayOnStart": "Открывать трей при запуске (да/нет)",
+      "showNotifications": "Показывать уведомления (да/нет)"
+    },
+    "help": {
+      "saveEscCancelTab": "[ctrl+s] сохранить  [esc] отмена  [tab] следующее поле",
+      "selectHost": "[enter] выбрать хост",
+      "toggle": "[space] переключить"
+    },
+    "titles": {
+      "tunnel": "Туннель",
+      "host": "Хост",
+      "settings": "Настройки",
+      "selectSSHHost": "Выберите SSH-хост",
+      "selectHostSource": "Выберите источник хоста"
+    },
+    "options": {
+      "selectExistingHost": "Выбрать из существующих SSH-хостов",
+      "enterCustomHost": "Ввести произвольный SSH-хост"
+    }
+  },
+  "help": {
+    "title": "Горячие клавиши",
+    "global": "Глобальные",
+    "tunnels": "Туннели",
+    "hosts": "SSH-хосты",
+    "goBack": "Нажмите [esc], [?] или [q] для возврата"
+  },
+  "dialog": {
+    "deleteTitle": "Удалить %s %q?",
+    "confirm": " подтвердить  ",
+    "cancel": " отмена"
+  },
+  "messages": {
+    "noHostsConfigured": "Хосты не настроены.",
+    "tunnelStarted": "Туннель %s запущен",
+    "tunnelStopped": "Туннель %s остановлен",
+    "tunnelRestarted": "Туннель %s перезапущен",
+    "failedToStart": "Не удалось запустить %s: %v",
+    "failedToStop": "Не удалось остановить %s: %v",
+    "failedToRestart": "Не удалось перезапустить %s: %v",
+    "connectionOK": "%s: соединение OK",
+    "connectionFailed": "%s: соединение не удалось",
+    "appHomeMoved": "Домашняя папка изменена на %s — требуется перезапуск",
+    "appHomeChanged": "Домашняя папка изменена. Пожалуйста, перезапустите Wombat."
+  },
+  "tray": {
+    "title": "Wombat SSH Helper",
+    "start": "Запустить",
+    "stop": "Остановить",
+    "restart": "Перезапустить",
+    "openLogs": "Открыть логи",
+    "edit": "Редактировать",
+    "openApp": "Открыть приложение",
+    "testNotification": "Тестовое уведомление",
+    "testNotificationBody": "Привет из трея!",
+    "quit": "Выход",
+    "stopBeforeQuit": "Остановить %d активных туннеля(ей) перед выходом?",
+    "yes": "Да",
+    "no": "Нет",
+    "activeTooltip": "%s активен (%s)",
+    "activeCountTooltip": "%d туннелей активно",
+    "failed": "Ошибка трея: %v",
+    "binaryNotFound": "Не удалось найти бинарник wombat. Поместите его в директорию из PATH.",
+    "failedOpenTerminal": "Не удалось открыть Terminal: %v",
+    "failedOpenTUI": "Не удалось открыть TUI: %v",
+    "failedGetLogPath": "Не удалось получить путь к логу: %v",
+    "noLogsYet": "Пока нет логов для туннеля %s",
+    "failedOpenLog": "Не удалось открыть лог: %v"
+  },
+  "cli": {
+    "listHosts": "Список настроенных хостов",
+    "addHost": "Добавить новый хост",
+    "removeHost": "Удалить хост",
+    "connect": "Подключиться к хосту через SSH",
+    "test": "Проверить TCP-соединение с хостом",
+    "importSSHConfig": "Импортировать хосты из ~/.ssh/config в Wombat",
+    "addTunnel": "Добавить новый туннель",
+    "removeTunnel": "Удалить туннель",
+    "tunnelDaemon": "Запустить туннель в фоне (внутреннее)",
+    "trayDaemon": "Запустить демон системного трея (внутреннее)",
+    "tunnelStart": "Запустить туннель в фоне",
+    "tunnelStop": "Остановить запущенный туннель",
+    "tunnelRestart": "Перезапустить туннель",
+    "tui": "Запустить TUI",
+    "tunnelList": "Список всех туннелей",
+    "version": "Показать версию",
+    "hostAdded": "Хост %q добавлен.",
+    "hostRemoved": "Хост %q удалён.",
+    "hostNotFound": "хост %q не найден",
+    "connectionFailed": "Соединение не удалось: %v",
+    "connectionOK": "Соединение OK",
+    "noImportableHosts": "В ~/.ssh/config не найдено хостов для импорта.",
+    "skippingExisting": "Пропуск %q (уже существует)",
+    "importedHost": "Импортирован %q (%s@%s)",
+    "importedCount": "Импортировано %d хост(ов).",
+    "noNewHosts": "Нет новых хостов для импорта.",
+    "tunnelAdded": "Туннель %q добавлен: localhost:%d -> %s:%d через %s",
+    "tunnelRunning": "туннель %q всё ещё запущен; остановите перед удалением",
+    "tunnelRemoved": "Туннель %q удалён.",
+    "tunnelNotFound": "туннель %q не найден",
+    "hostForTunnelNotFound": "хост %q для туннеля не найден",
+    "tunnelFailedToStartWithLog": "туннель %q не удалось запустить; вывод лога:\n%s",
+    "tunnelFailedToStart": "туннель %q не удалось запустить (см. лог: %s)",
+    "tunnelStarted": "Туннель %q запущен в фоне (PID %d).",
+    "logs": "Логи: %s",
+    "tunnelNotRunning": "туннель %q не запущен",
+    "tunnelStopped": "Туннель %q остановлен.",
+    "tunnelAlreadyRunning": "туннель %q уже запущен",
+    "addressAndUserRequired": "--address и --user обязательны",
+    "hostLocalRemoteRequired": "--host, --local-port и --remote-port обязательны",
+    "findExecutable": "поиск исполняемого файла: %w",
+    "startDaemon": "запуск демона: %w",
+    "versionFormat": "wombat %s"
+  },
+  "flags": {
+    "address": "Адрес хоста (обязательно)",
+    "user": "SSH пользователь (обязательно)",
+    "port": "SSH порт",
+    "key": "Путь к приватному ключу",
+    "host": "Алиас SSH-хоста для туннеля (обязательно)",
+    "localPort": "Локальный порт для прослушивания (обязательно)",
+    "remoteHost": "Удалённый хост для перенаправления",
+    "remotePort": "Удалённый порт для перенаправления (обязательно)",
+    "editTunnel": "Открыть TUI сразу в форме редактирования указанного туннеля"
+  },
+  "errors": {
+    "trayDaemonNotRunning": "демон трея не запущен",
+    "invalidTrayPid": "неверный PID-файл трея",
+    "trayProcessNotFound": "процесс демона трея не найден",
+    "keepaliveTimedOut": "keepalive превышен",
+    "noAuthMethods": "нет доступных методов аутентификации",
+    "openLogFile": "открытие файла лога: %w",
+    "writePidFile": "запись PID-файла: %w",
+    "appHomeEmpty": "домашняя папка приложения не может быть пустой",
+    "setAppHome": "не удалось установить домашнюю папку: %w",
+    "allFieldsRequired": "все поля обязательны",
+    "nameAddressUserRequired": "имя, адрес и пользователь обязательны",
+    "invalidPort": "неверный порт: %v",
+    "portRange": "порт должен быть от 1 до 65535"
+  }
+}

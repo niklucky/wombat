@@ -2,6 +2,7 @@ package tui
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/niklucky/wombat/internal/locales"
 )
 
 func (m *Model) hostSelectUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -34,12 +35,12 @@ func (m *Model) hostSelectUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) hostSelectView() string {
-	s := formLabelStyle.Render("Select SSH host") + "\n\n"
+	s := formLabelStyle.Render(locales.T("forms.titles.selectSSHHost")) + "\n\n"
 	if len(m.config.Hosts) == 0 {
-		s += "  No hosts configured.\n"
+		s += "  " + locales.T("messages.noHostsConfigured") + "\n"
 	} else {
 		s += m.hostTable.View()
 	}
-	s += "\n" + formHelpStyle.Render("[↑/↓] navigate  [↵] select  [esc] back")
+	s += "\n" + formHelpStyle.Render("[↑/↓] "+locales.T("keys.navigate")+"  [↵] "+locales.T("keys.selectHost")+"  [esc] "+locales.T("keys.cancel"))
 	return s
 }

@@ -3,6 +3,7 @@ package tui
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/niklucky/wombat/internal/locales"
 )
 
 func (m *Model) helpUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -17,31 +18,31 @@ func (m *Model) helpUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) renderHelpView() string {
-	s := titleStyle.Render("  Wombat SSH Helper") + "\n\n"
-	s += "  " + lipgloss.NewStyle().Bold(true).Render("Keyboard Shortcuts") + "\n\n"
+	s := titleStyle.Render("  "+locales.T("app.title")) + "\n\n"
+	s += "  " + lipgloss.NewStyle().Bold(true).Render(locales.T("help.title")) + "\n\n"
 
-	s += "  " + actionStyle.Render("Global") + "\n"
-	s += "    " + actionStyle.Render("[?]") + helpStyle.Render(" Help ") + "\n"
-	s += "    " + actionStyle.Render("[s]") + helpStyle.Render(" Settings ") + "\n"
-	s += "    " + actionStyle.Render("[⇥]") + helpStyle.Render(" Select tab ") + "\n"
-	s += "    " + actionStyle.Render("[q]") + helpStyle.Render(" Quit ") + "\n\n"
+	s += "  " + actionStyle.Render(locales.T("help.global")) + "\n"
+	s += "    " + actionStyle.Render("[?]") + helpStyle.Render(" "+locales.T("actions.help")+" ") + "\n"
+	s += "    " + actionStyle.Render("[s]") + helpStyle.Render(" "+locales.T("actions.settings")+" ") + "\n"
+	s += "    " + actionStyle.Render("[⇥]") + helpStyle.Render(" "+locales.T("actions.selectTab")+" ") + "\n"
+	s += "    " + actionStyle.Render("[q]") + helpStyle.Render(" "+locales.T("actions.quit")+" ") + "\n\n"
 
-	s += "  " + actionStyle.Render("Tunnels") + "\n"
-	s += "    " + actionStyle.Render("[↑/↓]") + helpStyle.Render(" Navigate ") + "\n"
-	s += "    " + actionStyle.Render("[↵]") + helpStyle.Render(" Edit ") + "\n"
-	s += "    " + actionStyle.Render("[Space]") + helpStyle.Render(" Connect / Disconnect ") + "\n"
-	s += "    " + actionStyle.Render("[r]") + helpStyle.Render(" Restart ") + "\n"
-	s += "    " + actionStyle.Render("[n]") + helpStyle.Render(" Add ") + "\n"
-	s += "    " + actionStyle.Render("[⌫]") + helpStyle.Render(" Delete ") + "\n\n"
+	s += "  " + actionStyle.Render(locales.T("help.tunnels")) + "\n"
+	s += "    " + actionStyle.Render("[↑/↓]") + helpStyle.Render(" "+locales.T("keys.navigate")+" ") + "\n"
+	s += "    " + actionStyle.Render("[↵]") + helpStyle.Render(" "+locales.T("keys.edit")+" ") + "\n"
+	s += "    " + actionStyle.Render("[Space]") + helpStyle.Render(" "+locales.T("keys.connectDisconnect")+" ") + "\n"
+	s += "    " + actionStyle.Render("[r]") + helpStyle.Render(" "+locales.T("keys.restart")+" ") + "\n"
+	s += "    " + actionStyle.Render("[n]") + helpStyle.Render(" "+locales.T("keys.add")+" ") + "\n"
+	s += "    " + actionStyle.Render("[⌫]") + helpStyle.Render(" "+locales.T("keys.delete")+" ") + "\n\n"
 
-	s += "  " + actionStyle.Render("SSH Hosts") + "\n"
-	s += "    " + actionStyle.Render("[↑/↓]") + helpStyle.Render(" Navigate ") + "\n"
-	s += "    " + actionStyle.Render("[↵]") + helpStyle.Render(" Edit ") + "\n"
-	s += "    " + actionStyle.Render("[Space]") + helpStyle.Render(" Connect ") + "\n"
-	s += "    " + actionStyle.Render("[t]") + helpStyle.Render(" Test connection ") + "\n"
-	s += "    " + actionStyle.Render("[n]") + helpStyle.Render(" Add ") + "\n"
-	s += "    " + actionStyle.Render("[⌫]") + helpStyle.Render(" Delete ") + "\n\n"
+	s += "  " + actionStyle.Render(locales.T("help.hosts")) + "\n"
+	s += "    " + actionStyle.Render("[↑/↓]") + helpStyle.Render(" "+locales.T("keys.navigate")+" ") + "\n"
+	s += "    " + actionStyle.Render("[↵]") + helpStyle.Render(" "+locales.T("keys.edit")+" ") + "\n"
+	s += "    " + actionStyle.Render("[Space]") + helpStyle.Render(" "+locales.T("keys.connect")+" ") + "\n"
+	s += "    " + actionStyle.Render("[t]") + helpStyle.Render(" "+locales.T("keys.testConnection")+" ") + "\n"
+	s += "    " + actionStyle.Render("[n]") + helpStyle.Render(" "+locales.T("keys.add")+" ") + "\n"
+	s += "    " + actionStyle.Render("[⌫]") + helpStyle.Render(" "+locales.T("keys.delete")+" ") + "\n\n"
 
-	s += helpStyle.Render("  Press [esc], [?] or [q] to go back")
+	s += helpStyle.Render("  " + locales.T("help.goBack"))
 	return s
 }

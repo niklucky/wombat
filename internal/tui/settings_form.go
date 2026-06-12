@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/niklucky/wombat/internal/core"
+	"github.com/niklucky/wombat/internal/locales"
 	"github.com/niklucky/wombat/internal/notify"
 	"github.com/niklucky/wombat/internal/tunnelmgr"
 )
@@ -20,7 +21,11 @@ func (m *Model) initSettingsForm() {
 	home, _ := core.AppHome()
 
 	inputs := make([]textinput.Model, 3)
-	placeholders := []string{"App home folder", "Open tray on start (yes/no)", "Show notifications (yes/no)"}
+	placeholders := []string{
+		locales.T("forms.placeholders.appHomeFolder"),
+		locales.T("forms.placeholders.openTrayOnStart"),
+		locales.T("forms.placeholders.showNotifications"),
+	}
 	values := []string{
 		home,
 		boolToYesNo(m.config.OpenTray),
@@ -91,7 +96,7 @@ func (m *Model) saveSettingsForm() (bool, error) {
 	showNotify := yesNoToBool(m.formInputs[2].Value())
 
 	if newHome == "" {
-		return false, fmt.Errorf("app home folder cannot be empty")
+		return false, locales.Errorf("errors.appHomeEmpty")
 	}
 
 	oldHome, _ := core.AppHome()
@@ -118,10 +123,10 @@ func (m *Model) saveSettingsForm() (bool, error) {
 
 		// Update pointer
 		if err := core.SetAppHome(newHome); err != nil {
-			return false, fmt.Errorf("failed to set app home: %w", err)
+			return false, locales.Errorf("errors.setAppHome", err)
 		}
 
-		notify.Notify("Wombat", fmt.Sprintf("App home moved to %s — restart required", newHome))
+		notify.Notify(locales.T("app.title"), fmt.Sprintf(locales.T("messages.appHomeMoved"), newHome))
 	}
 
 	m.config.OpenTray = openTray
@@ -131,9 +136,13 @@ func (m *Model) saveSettingsForm() (bool, error) {
 }
 
 func (m *Model) settingsFormView() string {
-	labels := []string{"App home folder", "Open tray on start", "Show notifications"}
+	labels := []string{
+		locales.T("forms.labels.appHomeFolder"),
+		locales.T("forms.labels.openTrayOnStart"),
+		locales.T("forms.labels.showNotifications"),
+	}
 
-	s := formLabelStyle.Render("Settings") + "\n\n"
+	s := formLabelStyle.Render(locales.T("forms.titles.settings")) + "\n\n"
 	for i := range m.formInputs {
 		cursor := "  "
 		if i == m.formFocus {
@@ -142,6 +151,6 @@ func (m *Model) settingsFormView() string {
 		s += cursor + formLabelStyle.Render(labels[i]) + "\n"
 		s += "  " + m.formInputs[i].View() + "\n\n"
 	}
-	s += formHelpStyle.Render("[ctrl+s] save  [esc] cancel  [tab] next field")
+	s += formHelpStyle.Render(locales.T("forms.help.saveEscCancelTab"))
 	return s
 }

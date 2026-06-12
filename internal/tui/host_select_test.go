@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/niklucky/wombat/internal/core"
+	"github.com/niklucky/wombat/internal/locales"
 	"github.com/niklucky/wombat/internal/models"
 )
 
@@ -65,10 +66,11 @@ func TestHostSelectUpdate_enterNoHosts(t *testing.T) {
 }
 
 func TestHostSelectView_emptyHosts(t *testing.T) {
+	_ = locales.SetLanguage("en")
 	m := Model{config: core.Config{Hosts: []models.Host{}}}
 	m.initTables()
 	s := m.hostSelectView()
-	if !strings.Contains(s, "No hosts configured") {
+	if !strings.Contains(s, locales.T("messages.noHostsConfigured")) {
 		t.Error("expected 'No hosts configured' message")
 	}
 }

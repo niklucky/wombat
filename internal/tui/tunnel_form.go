@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/niklucky/wombat/internal/core"
+	"github.com/niklucky/wombat/internal/locales"
 )
 
 func (m *Model) initForm(isCreate bool, tunnel *core.Tunnel) {
@@ -16,7 +17,13 @@ func (m *Model) initForm(isCreate bool, tunnel *core.Tunnel) {
 	m.formFocus = 0
 
 	inputs := make([]textinput.Model, 5)
-	placeholders := []string{"Name", "Host alias", "Local port", "Remote host", "Remote port"}
+	placeholders := []string{
+		locales.T("forms.placeholders.name"),
+		locales.T("forms.placeholders.hostAlias"),
+		locales.T("forms.placeholders.localPort"),
+		locales.T("forms.placeholders.remoteHost"),
+		locales.T("forms.placeholders.remotePort"),
+	}
 	values := []string{"", "", "", "localhost", ""}
 
 	if tunnel != nil {
@@ -111,7 +118,7 @@ func (m *Model) saveForm() error {
 	remotePort, _ := strconv.Atoi(m.formInputs[4].Value())
 
 	if name == "" || hostName == "" || localPort == 0 || remotePort == 0 {
-		return fmt.Errorf("all fields are required")
+		return locales.Errorf("errors.allFieldsRequired")
 	}
 	if remoteHost == "" {
 		remoteHost = "localhost"
@@ -145,9 +152,15 @@ func (m *Model) saveForm() error {
 }
 
 func (m *Model) formView() string {
-	labels := []string{"Name", "Host alias", "Local port", "Remote host", "Remote port"}
+	labels := []string{
+		locales.T("forms.labels.name"),
+		locales.T("forms.labels.hostAlias"),
+		locales.T("forms.labels.localPort"),
+		locales.T("forms.labels.remoteHost"),
+		locales.T("forms.labels.remotePort"),
+	}
 
-	s := formLabelStyle.Render("Tunnel") + "\n\n"
+	s := formLabelStyle.Render(locales.T("forms.titles.tunnel")) + "\n\n"
 	for i := range m.formInputs {
 		cursor := "  "
 		if i == m.formFocus {
@@ -156,9 +169,9 @@ func (m *Model) formView() string {
 		s += cursor + formLabelStyle.Render(labels[i]) + "\n"
 		s += "  " + m.formInputs[i].View() + "\n\n"
 	}
-	help := "[ctrl+s] save  [esc] cancel  [tab] next field"
+	help := locales.T("forms.help.saveEscCancelTab")
 	if m.formFocus == 1 {
-		help += "  [enter] select host"
+		help += "  " + locales.T("forms.help.selectHost")
 	}
 	s += formHelpStyle.Render(help)
 	return s

@@ -5,17 +5,18 @@ import (
 
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/niklucky/wombat/internal/locales"
 	"github.com/niklucky/wombat/internal/tunnelmgr"
 )
 
 func (m *Model) initTables() {
 	// Tunnel table
 	tunnelCols := []table.Column{
-		{Title: "#", Width: 4},
+		{Title: locales.T("table.columns.number"), Width: 4},
 		{Title: "", Width: 3},
-		{Title: "Name", Width: 22},
-		{Title: "Host", Width: 22},
-		{Title: "Forward", Width: 22},
+		{Title: locales.T("table.columns.name"), Width: 22},
+		{Title: locales.T("table.columns.host"), Width: 22},
+		{Title: locales.T("table.columns.forward"), Width: 22},
 	}
 	m.tunnelTable = table.New(
 		table.WithColumns(tunnelCols),
@@ -31,11 +32,11 @@ func (m *Model) initTables() {
 
 	// Host table
 	hostCols := []table.Column{
-		{Title: "#", Width: 4},
-		{Title: "Name", Width: 24},
-		{Title: "Address", Width: 20},
-		{Title: "User", Width: 14},
-		{Title: "Port", Width: 8},
+		{Title: locales.T("table.columns.number"), Width: 4},
+		{Title: locales.T("table.columns.name"), Width: 24},
+		{Title: locales.T("table.columns.address"), Width: 20},
+		{Title: locales.T("table.columns.user"), Width: 14},
+		{Title: locales.T("table.columns.port"), Width: 8},
 	}
 	m.hostTable = table.New(
 		table.WithColumns(hostCols),
@@ -101,39 +102,39 @@ func (m *Model) activeTable() *table.Model {
 
 func (m *Model) renderTableView() string {
 	// Title
-	s := titleStyle.Render("  Wombat SSH Helper") + "\n"
-	s += subtitleStyle.Render("  Cross-platform SSH helper with TUI and system tray") + "\n\n"
+	s := titleStyle.Render("  "+locales.T("app.title")) + "\n"
+	s += subtitleStyle.Render("  "+locales.T("app.subtitle")) + "\n\n"
 
 	// Actions bar
-	s += "  Actions: "
-	s += actionStyle.Render("[?]") + helpStyle.Render(" Help ")
-	s += actionStyle.Render("[s]") + helpStyle.Render(" Settings ")
-	s += actionStyle.Render("[⇥]") + helpStyle.Render(" Select tab ")
-	s += actionStyle.Render("[q]") + helpStyle.Render(" Quit ")
+	s += "  " + locales.T("actions.label") + " "
+	s += actionStyle.Render("[?]") + helpStyle.Render(" " + locales.T("actions.help") + " ")
+	s += actionStyle.Render("[s]") + helpStyle.Render(" " + locales.T("actions.settings") + " ")
+	s += actionStyle.Render("[⇥]") + helpStyle.Render(" " + locales.T("actions.selectTab") + " ")
+	s += actionStyle.Render("[q]") + helpStyle.Render(" " + locales.T("actions.quit") + " ")
 	s += "\n\n"
 
 	// Tabs
 	tabStr := "  "
 	if m.activeTab == "tunnels" {
-		tabStr += activeTabStyle.Render("Tunnels")
+		tabStr += activeTabStyle.Render(locales.T("tabs.tunnels"))
 	} else {
-		tabStr += tabStyle.Render("Tunnels")
+		tabStr += tabStyle.Render(locales.T("tabs.tunnels"))
 	}
 	tabStr += "  "
 	if m.activeTab == "hosts" {
-		tabStr += activeTabStyle.Render("SSH Hosts")
+		tabStr += activeTabStyle.Render(locales.T("tabs.hosts"))
 	} else {
-		tabStr += tabStyle.Render("SSH Hosts")
+		tabStr += tabStyle.Render(locales.T("tabs.hosts"))
 	}
 	s += tabStr + "\n\n"
 
 	// Table content
 	if m.activeTab == "tunnels" {
 		s += m.tunnelTable.View()
-		s += "\n  " + actionStyle.Render("[↵]") + helpStyle.Render(" Edit  ") + actionStyle.Render("[Space]") + helpStyle.Render(" Connect/Disconnect  ") + actionStyle.Render("[r]") + helpStyle.Render(" Restart  ") + actionStyle.Render("[n]") + helpStyle.Render(" Add  ") + actionStyle.Render("[⌫]") + helpStyle.Render(" Delete")
+		s += "\n  " + actionStyle.Render("[↵]") + helpStyle.Render(" "+locales.T("keys.edit")+"  ") + actionStyle.Render("[Space]") + helpStyle.Render(" "+locales.T("keys.connectDisconnect")+"  ") + actionStyle.Render("[r]") + helpStyle.Render(" "+locales.T("keys.restart")+"  ") + actionStyle.Render("[n]") + helpStyle.Render(" "+locales.T("keys.add")+"  ") + actionStyle.Render("[⌫]") + helpStyle.Render(" "+locales.T("keys.delete"))
 	} else {
 		s += m.hostTable.View()
-		s += "\n  " + actionStyle.Render("[↵]") + helpStyle.Render(" Edit  ") + actionStyle.Render("[t]") + helpStyle.Render(" Test  ") + actionStyle.Render("[n]") + helpStyle.Render(" Add  ") + actionStyle.Render("[⌫]") + helpStyle.Render(" Delete")
+		s += "\n  " + actionStyle.Render("[↵]") + helpStyle.Render(" "+locales.T("keys.edit")+"  ") + actionStyle.Render("[t]") + helpStyle.Render(" "+locales.T("keys.test")+"  ") + actionStyle.Render("[n]") + helpStyle.Render(" "+locales.T("keys.add")+"  ") + actionStyle.Render("[⌫]") + helpStyle.Render(" "+locales.T("keys.delete"))
 	}
 
 	return s
