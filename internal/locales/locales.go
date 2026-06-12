@@ -24,6 +24,9 @@ var (
 
 	//go:embed es.json
 	esJSON []byte
+
+	//go:embed zh.json
+	zhJSON []byte
 )
 
 // Locale holds the loaded dictionary for a single language.
@@ -46,6 +49,7 @@ func init() {
 		"ru": ruJSON,
 		"fr": frJSON,
 		"es": esJSON,
+		"zh": zhJSON,
 	} {
 		var nested map[string]any
 		if err := json.Unmarshal(data, &nested); err != nil {

@@ -8,14 +8,14 @@ import (
 
 func TestLanguages(t *testing.T) {
 	langs := Languages()
-	if len(langs) != 4 {
-		t.Fatalf("expected 4 languages, got %d: %v", len(langs), langs)
+	if len(langs) != 5 {
+		t.Fatalf("expected 5 languages, got %d: %v", len(langs), langs)
 	}
 	seen := make(map[string]bool)
 	for _, l := range langs {
 		seen[l] = true
 	}
-	for _, want := range []string{"en", "ru", "fr", "es"} {
+	for _, want := range []string{"en", "ru", "fr", "es", "zh"} {
 		if !seen[want] {
 			t.Fatalf("expected %s in languages, got %v", want, langs)
 		}
@@ -78,6 +78,14 @@ func TestTLookup(t *testing.T) {
 	}
 	if got := T("actions.quit"); got != "Salir" {
 		t.Fatalf("expected Spanish quit action, got %q", got)
+	}
+
+	SetLanguage("zh")
+	if got := T("tabs.tunnels"); got != "隧道" {
+		t.Fatalf("expected Chinese tunnels tab, got %q", got)
+	}
+	if got := T("actions.quit"); got != "退出" {
+		t.Fatalf("expected Chinese quit action, got %q", got)
 	}
 }
 
