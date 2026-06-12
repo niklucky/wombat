@@ -5,6 +5,10 @@
     "shortDescription": "Wombat — 跨平台 SSH 助手",
     "longDescription": "Wombat 是一个跨平台 SSH 助手，支持 TUI 和系统托盘。"
   },
+  "common": {
+    "yes": "是",
+    "no": "否"
+  },
   "actions": {
     "label": "操作：",
     "help": "帮助",

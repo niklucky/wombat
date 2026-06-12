@@ -103,14 +103,13 @@ func SetLanguage(lang string) error {
 	return nil
 }
 
-// normalize turns a locale string like "ru_RU.UTF-8" into "ru".
+// normalize turns a locale string like "ru_RU.UTF-8" or "zh-CN" into "ru" / "zh".
 func normalize(lang string) string {
 	lang = strings.ToLower(strings.TrimSpace(lang))
-	if idx := strings.Index(lang, "."); idx != -1 {
-		lang = lang[:idx]
-	}
-	if idx := strings.Index(lang, "_"); idx != -1 {
-		lang = lang[:idx]
+	for _, sep := range []string{".", "_", "-"} {
+		if idx := strings.Index(lang, sep); idx != -1 {
+			lang = lang[:idx]
+		}
 	}
 	return lang
 }

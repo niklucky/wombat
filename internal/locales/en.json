@@ -5,6 +5,10 @@
     "shortDescription": "Wombat — a cross-platform SSH helper",
     "longDescription": "Wombat is a cross-platform SSH helper with TUI and system tray."
   },
+  "common": {
+    "yes": "yes",
+    "no": "no"
+  },
   "actions": {
     "label": "Actions:",
     "help": "Help",

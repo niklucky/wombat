@@ -113,9 +113,15 @@ func (m *Model) restoreTunnelForm() {
 func (m *Model) saveForm() error {
 	name := m.formInputs[0].Value()
 	hostName := m.formInputs[1].Value()
-	localPort, _ := strconv.Atoi(m.formInputs[2].Value())
+	localPort, err := strconv.Atoi(m.formInputs[2].Value())
+	if err != nil {
+		return locales.Errorf("errors.invalidPort", err)
+	}
 	remoteHost := m.formInputs[3].Value()
-	remotePort, _ := strconv.Atoi(m.formInputs[4].Value())
+	remotePort, err := strconv.Atoi(m.formInputs[4].Value())
+	if err != nil {
+		return locales.Errorf("errors.invalidPort", err)
+	}
 
 	if name == "" || hostName == "" || localPort == 0 || remotePort == 0 {
 		return locales.Errorf("errors.allFieldsRequired")

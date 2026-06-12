@@ -6,6 +6,27 @@ import (
 	"testing"
 )
 
+func setLanguage(t *testing.T, lang string) {
+	t.Helper()
+	if err := SetLanguage(lang); err != nil {
+		t.Fatalf("SetLanguage(%q) failed: %v", lang, err)
+	}
+}
+
+func unsetenv(t *testing.T, key string) {
+	t.Helper()
+	if err := os.Unsetenv(key); err != nil {
+		t.Fatalf("Unsetenv(%q) failed: %v", key, err)
+	}
+}
+
+func setenv(t *testing.T, key, value string) {
+	t.Helper()
+	if err := os.Setenv(key, value); err != nil {
+		t.Fatalf("Setenv(%q, %q) failed: %v", key, value, err)
+	}
+}
+
 func TestLanguages(t *testing.T) {
 	langs := Languages()
 	if len(langs) != 5 {
@@ -23,25 +44,21 @@ func TestLanguages(t *testing.T) {
 }
 
 func TestSetLanguage(t *testing.T) {
-	defer SetLanguage("en")
+	defer func() { setLanguage(t, "en") }()
 
-	if err := SetLanguage("ru"); err != nil {
-		t.Fatalf("SetLanguage(ru) failed: %v", err)
-	}
+	setLanguage(t, "ru")
 	if Current() != "ru" {
 		t.Fatalf("expected current language ru, got %s", Current())
 	}
 
-	if err := SetLanguage("en"); err != nil {
-		t.Fatalf("SetLanguage(en) failed: %v", err)
-	}
+	setLanguage(t, "en")
 	if Current() != "en" {
 		t.Fatalf("expected current language en, got %s", Current())
 	}
 }
 
 func TestSetLanguageUnsupported(t *testing.T) {
-	defer SetLanguage("en")
+	defer func() { setLanguage(t, "en") }()
 
 	if err := SetLanguage("zz"); err == nil {
 		t.Fatal("expected error for unsupported language")
@@ -49,14 +66,14 @@ func TestSetLanguageUnsupported(t *testing.T) {
 }
 
 func TestTLookup(t *testing.T) {
-	defer SetLanguage("en")
+	defer func() { setLanguage(t, "en") }()
 
-	SetLanguage("en")
+	setLanguage(t, "en")
 	if got := T("app.title"); got != "Wombat SSH Helper" {
 		t.Fatalf("expected English title, got %q", got)
 	}
 
-	SetLanguage("ru")
+	setLanguage(t, "ru")
 	if got := T("app.title"); got != "Wombat SSH Helper" {
 		t.Fatalf("expected Russian title to fall back to English, got %q", got)
 	}
@@ -64,7 +81,7 @@ func TestTLookup(t *testing.T) {
 		t.Fatalf("expected Russian tunnels tab, got %q", got)
 	}
 
-	SetLanguage("fr")
+	setLanguage(t, "fr")
 	if got := T("tabs.tunnels"); got != "Tunnels" {
 		t.Fatalf("expected French tunnels tab, got %q", got)
 	}
@@ -72,7 +89,7 @@ func TestTLookup(t *testing.T) {
 		t.Fatalf("expected French quit action, got %q", got)
 	}
 
-	SetLanguage("es")
+	setLanguage(t, "es")
 	if got := T("tabs.tunnels"); got != "Túneles" {
 		t.Fatalf("expected Spanish tunnels tab, got %q", got)
 	}
@@ -80,7 +97,7 @@ func TestTLookup(t *testing.T) {
 		t.Fatalf("expected Spanish quit action, got %q", got)
 	}
 
-	SetLanguage("zh")
+	setLanguage(t, "zh")
 	if got := T("tabs.tunnels"); got != "隧道" {
 		t.Fatalf("expected Chinese tunnels tab, got %q", got)
 	}
@@ -90,32 +107,32 @@ func TestTLookup(t *testing.T) {
 }
 
 func TestTArgs(t *testing.T) {
-	defer SetLanguage("en")
+	defer func() { setLanguage(t, "en") }()
 
-	SetLanguage("en")
+	setLanguage(t, "en")
 	if got := T("messages.tunnelStarted", "web"); !strings.Contains(got, "web") {
 		t.Fatalf("expected formatted message to contain name, got %q", got)
 	}
 
-	SetLanguage("ru")
+	setLanguage(t, "ru")
 	if got := T("messages.tunnelStarted", "web"); !strings.Contains(got, "web") {
 		t.Fatalf("expected Russian formatted message to contain name, got %q", got)
 	}
 }
 
 func TestTFallback(t *testing.T) {
-	defer SetLanguage("en")
+	defer func() { setLanguage(t, "en") }()
 
-	SetLanguage("ru")
+	setLanguage(t, "ru")
 	if got := T("this.key.does.not.exist"); got != "this.key.does.not.exist" {
 		t.Fatalf("expected missing key to be returned as-is, got %q", got)
 	}
 }
 
 func TestErrorf(t *testing.T) {
-	defer SetLanguage("en")
+	defer func() { setLanguage(t, "en") }()
 
-	SetLanguage("en")
+	setLanguage(t, "en")
 	err := Errorf("errors.allFieldsRequired")
 	if err == nil || err.Error() != "all fields are required" {
 		t.Fatalf("unexpected error: %v", err)
@@ -129,31 +146,31 @@ func TestErrorf(t *testing.T) {
 
 func TestDetectLanguage(t *testing.T) {
 	defer func() {
-		os.Unsetenv("WOMBAT_LANG")
-		os.Unsetenv("LC_ALL")
-		os.Unsetenv("LANG")
-		SetLanguage("en")
+		unsetenv(t, "WOMBAT_LANG")
+		unsetenv(t, "LC_ALL")
+		unsetenv(t, "LANG")
+		setLanguage(t, "en")
 	}()
 
-	os.Unsetenv("WOMBAT_LANG")
-	os.Unsetenv("LC_ALL")
-	os.Unsetenv("LANG")
+	unsetenv(t, "WOMBAT_LANG")
+	unsetenv(t, "LC_ALL")
+	unsetenv(t, "LANG")
 	if got := DetectLanguage(); got != "en" {
 		t.Fatalf("expected default en, got %s", got)
 	}
 
-	os.Setenv("WOMBAT_LANG", "ru")
+	setenv(t, "WOMBAT_LANG", "ru")
 	if got := DetectLanguage(); got != "ru" {
 		t.Fatalf("expected ru from WOMBAT_LANG, got %s", got)
 	}
 
-	os.Unsetenv("WOMBAT_LANG")
-	os.Setenv("LANG", "ru_RU.UTF-8")
+	unsetenv(t, "WOMBAT_LANG")
+	setenv(t, "LANG", "ru_RU.UTF-8")
 	if got := DetectLanguage(); got != "ru" {
 		t.Fatalf("expected ru from LANG, got %s", got)
 	}
 
-	os.Setenv("LANG", "unknown")
+	setenv(t, "LANG", "unknown")
 	if got := DetectLanguage(); got != "en" {
 		t.Fatalf("expected fallback en for unknown locale, got %s", got)
 	}
@@ -161,11 +178,13 @@ func TestDetectLanguage(t *testing.T) {
 
 func TestNormalize(t *testing.T) {
 	cases := map[string]string{
-		"en":         "en",
-		"EN":         "en",
-		"ru_RU":      "ru",
+		"en":          "en",
+		"EN":          "en",
+		"ru_RU":       "ru",
 		"ru_RU.UTF-8": "ru",
-		"  RU  ":     "ru",
+		"  RU  ":      "ru",
+		"es-MX":       "es",
+		"zh-CN":       "zh",
 	}
 	for in, want := range cases {
 		if got := normalize(in); got != want {

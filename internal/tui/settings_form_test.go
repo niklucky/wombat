@@ -1,6 +1,18 @@
 package tui
 
-import "testing"
+import (
+	"os"
+	"testing"
+
+	"github.com/niklucky/wombat/internal/locales"
+)
+
+func TestMain(m *testing.M) {
+	if err := locales.SetLanguage("en"); err != nil {
+		panic(err)
+	}
+	os.Exit(m.Run())
+}
 
 func TestBoolToYesNo(t *testing.T) {
 	if boolToYesNo(true) != "yes" {

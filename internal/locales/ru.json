@@ -5,6 +5,10 @@
     "shortDescription": "Wombat — кроссплатформенный SSH-помощник",
     "longDescription": "Wombat — кроссплатформенный SSH-помощник с TUI и системным треем."
   },
+  "common": {
+    "yes": "да",
+    "no": "нет"
+  },
   "actions": {
     "label": "Действия:",
     "help": "Помощь",

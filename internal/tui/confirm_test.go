@@ -8,7 +8,9 @@ import (
 )
 
 func TestRenderConfirmDelete(t *testing.T) {
-	_ = locales.SetLanguage("en")
+	if err := locales.SetLanguage("en"); err != nil {
+		t.Fatalf("SetLanguage(en) failed: %v", err)
+	}
 	s := renderConfirmDelete("tunnel", "mytunnel")
 	want := locales.T("dialog.deleteTitle", "tunnel", "mytunnel")
 	if !strings.Contains(s, want) {

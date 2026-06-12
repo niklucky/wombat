@@ -25,7 +25,7 @@ func (m *Model) initHostForm(isCreate bool, host *core.Host) {
 		locales.T("forms.placeholders.keyPath"),
 		locales.T("forms.placeholders.saveToSSHHosts"),
 	}
-	values := []string{"", "", "", "22", "", "yes"}
+	values := []string{"", "", "", "22", "", boolToYesNo(true)}
 
 	if host != nil {
 		values[0] = host.Name
@@ -88,10 +88,10 @@ func (m *Model) hostFormUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.updateFormFocus()
 		case " ":
 			if m.formFocus == 5 {
-				if m.formInputs[5].Value() == "yes" {
-					m.formInputs[5].SetValue("no")
+				if yesNoToBool(m.formInputs[5].Value()) {
+					m.formInputs[5].SetValue(boolToYesNo(false))
 				} else {
-					m.formInputs[5].SetValue("yes")
+					m.formInputs[5].SetValue(boolToYesNo(true))
 				}
 				return m, nil
 			}

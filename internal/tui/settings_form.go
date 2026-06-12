@@ -46,14 +46,15 @@ func (m *Model) initSettingsForm() {
 
 func boolToYesNo(v bool) string {
 	if v {
-		return "yes"
+		return locales.T("common.yes")
 	}
-	return "no"
+	return locales.T("common.no")
 }
 
 func yesNoToBool(s string) bool {
 	lower := strings.ToLower(strings.TrimSpace(s))
-	return lower == "yes" || lower == "y" || lower == "true"
+	return lower == "yes" || lower == "y" || lower == "true" ||
+		lower == strings.ToLower(locales.T("common.yes"))
 }
 
 func (m *Model) settingsFormUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {

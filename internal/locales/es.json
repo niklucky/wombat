@@ -5,6 +5,10 @@
     "shortDescription": "Wombat — asistente SSH multiplataforma",
     "longDescription": "Wombat es un asistente SSH multiplataforma con TUI y bandeja del sistema."
   },
+  "common": {
+    "yes": "sí",
+    "no": "no"
+  },
   "actions": {
     "label": "Acciones:",
     "help": "Ayuda",
