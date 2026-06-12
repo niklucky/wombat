@@ -131,7 +131,7 @@ func (m *Model) renderTableView() string {
 	// Table content
 	if m.activeTab == "tunnels" {
 		s += m.tunnelTable.View()
-		s += "\n  " + actionStyle.Render("[↵]") + helpStyle.Render(" "+locales.T("keys.edit")+"  ") + actionStyle.Render("[Space]") + helpStyle.Render(" "+locales.T("keys.connectDisconnect")+"  ") + actionStyle.Render("[r]") + helpStyle.Render(" "+locales.T("keys.restart")+"  ") + actionStyle.Render("[n]") + helpStyle.Render(" "+locales.T("keys.add")+"  ") + actionStyle.Render("[⌫]") + helpStyle.Render(" "+locales.T("keys.delete"))
+		s += "\n  " + actionStyle.Render("[↵]") + helpStyle.Render(" "+locales.T("keys.edit")+"  ") + actionStyle.Render("[␣]") + helpStyle.Render(" "+locales.T("keys.connectDisconnect")+"  ") + actionStyle.Render("[r]") + helpStyle.Render(" "+locales.T("keys.restart")+"  ") + actionStyle.Render("[n]") + helpStyle.Render(" "+locales.T("keys.add")+"  ") + actionStyle.Render("[⌫]") + helpStyle.Render(" "+locales.T("keys.delete"))
 	} else {
 		s += m.hostTable.View()
 		s += "\n  " + actionStyle.Render("[↵]") + helpStyle.Render(" "+locales.T("keys.edit")+"  ") + actionStyle.Render("[t]") + helpStyle.Render(" "+locales.T("keys.test")+"  ") + actionStyle.Render("[n]") + helpStyle.Render(" "+locales.T("keys.add")+"  ") + actionStyle.Render("[⌫]") + helpStyle.Render(" "+locales.T("keys.delete"))
