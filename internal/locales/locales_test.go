@@ -8,15 +8,17 @@ import (
 
 func TestLanguages(t *testing.T) {
 	langs := Languages()
-	if len(langs) != 2 {
-		t.Fatalf("expected 2 languages, got %d: %v", len(langs), langs)
+	if len(langs) != 4 {
+		t.Fatalf("expected 4 languages, got %d: %v", len(langs), langs)
 	}
 	seen := make(map[string]bool)
 	for _, l := range langs {
 		seen[l] = true
 	}
-	if !seen["en"] || !seen["ru"] {
-		t.Fatalf("expected en and ru, got %v", langs)
+	for _, want := range []string{"en", "ru", "fr", "es"} {
+		if !seen[want] {
+			t.Fatalf("expected %s in languages, got %v", want, langs)
+		}
 	}
 }
 
@@ -60,6 +62,22 @@ func TestTLookup(t *testing.T) {
 	}
 	if got := T("tabs.tunnels"); got != "Туннели" {
 		t.Fatalf("expected Russian tunnels tab, got %q", got)
+	}
+
+	SetLanguage("fr")
+	if got := T("tabs.tunnels"); got != "Tunnels" {
+		t.Fatalf("expected French tunnels tab, got %q", got)
+	}
+	if got := T("actions.quit"); got != "Quitter" {
+		t.Fatalf("expected French quit action, got %q", got)
+	}
+
+	SetLanguage("es")
+	if got := T("tabs.tunnels"); got != "Túneles" {
+		t.Fatalf("expected Spanish tunnels tab, got %q", got)
+	}
+	if got := T("actions.quit"); got != "Salir" {
+		t.Fatalf("expected Spanish quit action, got %q", got)
 	}
 }
 

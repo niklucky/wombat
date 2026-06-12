@@ -1,0 +1,219 @@
+{
+  "app": {
+    "title": "Wombat SSH Helper",
+    "subtitle": "Assistant SSH multiplateforme avec TUI et barre système",
+    "shortDescription": "Wombat — assistant SSH multiplateforme",
+    "longDescription": "Wombat est un assistant SSH multiplateforme avec TUI et barre système."
+  },
+  "actions": {
+    "label": "Actions :",
+    "help": "Aide",
+    "settings": "Paramètres",
+    "selectTab": "Changer d'onglet",
+    "quit": "Quitter"
+  },
+  "tabs": {
+    "tunnels": "Tunnels",
+    "hosts": "Hôtes SSH"
+  },
+  "status": {
+    "active": "actif",
+    "inactive": "inactif"
+  },
+  "keys": {
+    "navigate": "Naviguer",
+    "edit": "Modifier",
+    "connect": "Connecter",
+    "connectDisconnect": "Connecter / Déconnecter",
+    "restart": "Redémarrer",
+    "add": "Ajouter",
+    "delete": "Supprimer",
+    "test": "Tester",
+    "testConnection": "Tester la connexion",
+    "save": "enregistrer",
+    "cancel": "annuler",
+    "nextField": "champ suivant",
+    "selectHost": "sélectionner l'hôte",
+    "toggle": "basculer",
+    "confirm": "confirmer"
+  },
+  "table": {
+    "columns": {
+      "number": "#",
+      "name": "Nom",
+      "host": "Hôte",
+      "forward": "Redirection",
+      "address": "Adresse",
+      "user": "Utilisateur",
+      "port": "Port"
+    }
+  },
+  "forms": {
+    "labels": {
+      "name": "Nom",
+      "address": "Adresse",
+      "user": "Utilisateur",
+      "port": "Port",
+      "keyPath": "Chemin de la clé",
+      "saveToSSHHosts": "Enregistrer dans les hôtes SSH",
+      "hostAlias": "Alias de l'hôte",
+      "localPort": "Port local",
+      "remoteHost": "Hôte distant",
+      "remotePort": "Port distant",
+      "appHomeFolder": "Dossier de l'application",
+      "openTrayOnStart": "Ouvrir la barre système au démarrage",
+      "showNotifications": "Afficher les notifications"
+    },
+    "placeholders": {
+      "name": "Nom",
+      "address": "Adresse",
+      "user": "Utilisateur",
+      "port": "Port",
+      "keyPath": "Chemin de la clé",
+      "saveToSSHHosts": "Enregistrer dans les hôtes SSH",
+      "hostAlias": "Alias de l'hôte",
+      "localPort": "Port local",
+      "remoteHost": "Hôte distant",
+      "remotePort": "Port distant",
+      "appHomeFolder": "Dossier de l'application",
+      "openTrayOnStart": "Ouvrir la barre système au démarrage (oui/non)",
+      "showNotifications": "Afficher les notifications (oui/non)"
+    },
+    "help": {
+      "saveEscCancelTab": "[ctrl+s] enregistrer  [esc] annuler  [tab] champ suivant",
+      "selectHost": "[enter] sélectionner l'hôte",
+      "toggle": "[space] basculer"
+    },
+    "titles": {
+      "tunnel": "Tunnel",
+      "host": "Hôte",
+      "settings": "Paramètres",
+      "selectSSHHost": "Sélectionner un hôte SSH",
+      "selectHostSource": "Sélectionner la source de l'hôte"
+    },
+    "options": {
+      "selectExistingHost": "Sélectionner parmi les hôtes SSH existants",
+      "enterCustomHost": "Saisir un hôte SSH personnalisé"
+    }
+  },
+  "help": {
+    "title": "Raccourcis clavier",
+    "global": "Globaux",
+    "tunnels": "Tunnels",
+    "hosts": "Hôtes SSH",
+    "goBack": "Appuyez sur [esc], [?] ou [q] pour revenir"
+  },
+  "dialog": {
+    "deleteTitle": "Supprimer %s %q ?",
+    "confirm": " confirmer  ",
+    "cancel": " annuler"
+  },
+  "messages": {
+    "noHostsConfigured": "Aucun hôte configuré.",
+    "tunnelStarted": "Tunnel %s démarré",
+    "tunnelStopped": "Tunnel %s arrêté",
+    "tunnelRestarted": "Tunnel %s redémarré",
+    "failedToStart": "Échec du démarrage de %s : %v",
+    "failedToStop": "Échec de l'arrêt de %s : %v",
+    "failedToRestart": "Échec du redémarrage de %s : %v",
+    "connectionOK": "%s : connexion OK",
+    "connectionFailed": "%s : échec de la connexion",
+    "appHomeMoved": "Dossier de l'application déplacé vers %s — redémarrage requis",
+    "appHomeChanged": "Dossier de l'application modifié. Veuillez redémarrer Wombat."
+  },
+  "tray": {
+    "title": "Wombat SSH Helper",
+    "start": "Démarrer",
+    "stop": "Arrêter",
+    "restart": "Redémarrer",
+    "openLogs": "Ouvrir les journaux",
+    "edit": "Modifier",
+    "openApp": "Ouvrir l'application",
+    "testNotification": "Notification de test",
+    "testNotificationBody": "Bonjour depuis la barre système !",
+    "quit": "Quitter",
+    "stopBeforeQuit": "Arrêter %d tunnel(s) actif(s) avant de quitter ?",
+    "yes": "Oui",
+    "no": "Non",
+    "activeTooltip": "%s actif (%s)",
+    "activeCountTooltip": "%d tunnels actifs",
+    "failed": "Échec de la barre système : %v",
+    "binaryNotFound": "Impossible de localiser le binaire wombat. Veuillez le placer dans un répertoire de votre PATH.",
+    "failedOpenTerminal": "Échec de l'ouverture du Terminal : %v",
+    "failedOpenTUI": "Échec de l'ouverture du TUI : %v",
+    "failedGetLogPath": "Échec de l'obtention du chemin du journal : %v",
+    "noLogsYet": "Pas encore de journaux pour le tunnel %s",
+    "failedOpenLog": "Échec de l'ouverture du journal : %v"
+  },
+  "cli": {
+    "listHosts": "Lister les hôtes configurés",
+    "addHost": "Ajouter un nouvel hôte",
+    "removeHost": "Supprimer un hôte",
+    "connect": "Se connecter à un hôte via SSH",
+    "test": "Tester la connectivité TCP avec un hôte",
+    "importSSHConfig": "Importer les hôtes de ~/.ssh/config dans Wombat",
+    "addTunnel": "Ajouter un nouveau tunnel",
+    "removeTunnel": "Supprimer un tunnel",
+    "tunnelDaemon": "Exécuter un tunnel en arrière-plan (usage interne)",
+    "trayDaemon": "Exécuter le démon de la barre système (usage interne)",
+    "tunnelStart": "Démarrer un tunnel en arrière-plan",
+    "tunnelStop": "Arrêter un tunnel en cours d'exécution",
+    "tunnelRestart": "Redémarrer un tunnel",
+    "tui": "Lancer le TUI",
+    "tunnelList": "Lister tous les tunnels",
+    "version": "Afficher la version",
+    "hostAdded": "Hôte %q ajouté.",
+    "hostRemoved": "Hôte %q supprimé.",
+    "hostNotFound": "hôte %q non trouvé",
+    "connectionFailed": "Échec de la connexion : %v",
+    "connectionOK": "Connexion OK",
+    "noImportableHosts": "Aucun hôte importable trouvé dans ~/.ssh/config.",
+    "skippingExisting": "Ignoré %q (existe déjà)",
+    "importedHost": "Importé %q (%s@%s)",
+    "importedCount": "%d hôte(s) importé(s).",
+    "noNewHosts": "Aucun nouvel hôte à importer.",
+    "tunnelAdded": "Tunnel %q ajouté : localhost:%d -> %s:%d via %s",
+    "tunnelRunning": "le tunnel %q est toujours en cours d'exécution ; arrêtez-le avant de le supprimer",
+    "tunnelRemoved": "Tunnel %q supprimé.",
+    "tunnelNotFound": "tunnel %q non trouvé",
+    "hostForTunnelNotFound": "hôte %q pour le tunnel non trouvé",
+    "tunnelFailedToStartWithLog": "échec du démarrage du tunnel %q ; sortie du journal :\n%s",
+    "tunnelFailedToStart": "échec du démarrage du tunnel %q (voir le journal : %s)",
+    "tunnelStarted": "Tunnel %q démarré en arrière-plan (PID %d).",
+    "logs": "Journaux : %s",
+    "tunnelNotRunning": "le tunnel %q n'est pas en cours d'exécution",
+    "tunnelStopped": "Tunnel %q arrêté.",
+    "tunnelAlreadyRunning": "le tunnel %q est déjà en cours d'exécution",
+    "addressAndUserRequired": "--address et --user sont requis",
+    "hostLocalRemoteRequired": "--host, --local-port et --remote-port sont requis",
+    "findExecutable": "recherche de l'exécutable : %w",
+    "startDaemon": "démarrage du démon : %w",
+    "versionFormat": "wombat %s"
+  },
+  "flags": {
+    "address": "Adresse de l'hôte (obligatoire)",
+    "user": "Utilisateur SSH (obligatoire)",
+    "port": "Port SSH",
+    "key": "Chemin vers la clé privée",
+    "host": "Alias de l'hôte SSH à utiliser pour le tunnel (obligatoire)",
+    "localPort": "Port local à écouter (obligatoire)",
+    "remoteHost": "Hôte distant vers lequel rediriger",
+    "remotePort": "Port distant vers lequel rediriger (obligatoire)",
+    "editTunnel": "Ouvrir le TUI directement sur le formulaire d'édition du tunnel nommé"
+  },
+  "errors": {
+    "trayDaemonNotRunning": "le démon de la barre système n'est pas en cours d'exécution",
+    "invalidTrayPid": "fichier PID de la barre système invalide",
+    "trayProcessNotFound": "processus du démon de la barre système non trouvé",
+    "keepaliveTimedOut": "keepalive dépassé",
+    "noAuthMethods": "aucune méthode d'authentification disponible",
+    "openLogFile": "ouverture du fichier journal : %w",
+    "writePidFile": "écriture du fichier PID : %w",
+    "appHomeEmpty": "le dossier de l'application ne peut pas être vide",
+    "setAppHome": "échec de la définition du dossier de l'application : %w",
+    "allFieldsRequired": "tous les champs sont obligatoires",
+    "nameAddressUserRequired": "le nom, l'adresse et l'utilisateur sont obligatoires",
+    "invalidPort": "port invalide : %v",
+    "portRange": "le port doit être compris entre 1 et 65535"
+  }
+}
