@@ -17,6 +17,7 @@ func (m *Model) initHostForm(isCreate bool, host *core.Host) {
 	m.formFocus = 0
 
 	inputs := make([]textinput.Model, 6)
+	bools := make([]bool, 6)
 	placeholders := []string{
 		locales.T("forms.placeholders.name"),
 		locales.T("forms.placeholders.address"),
@@ -25,7 +26,8 @@ func (m *Model) initHostForm(isCreate bool, host *core.Host) {
 		locales.T("forms.placeholders.keyPath"),
 		locales.T("forms.placeholders.saveToSSHHosts"),
 	}
-	values := []string{"", "", "", "22", "", boolToYesNo(true)}
+	values := []string{"", "", "", "22", "", ""}
+	bools[5] = true
 
 	if host != nil {
 		values[0] = host.Name
@@ -42,13 +44,18 @@ func (m *Model) initHostForm(isCreate bool, host *core.Host) {
 	for i := range inputs {
 		inputs[i] = textinput.New()
 		inputs[i].Placeholder = placeholders[i]
-		inputs[i].SetValue(values[i])
+		if i == 5 {
+			inputs[i].SetValue(boolToYesNo(bools[i]))
+		} else {
+			inputs[i].SetValue(values[i])
+		}
 		inputs[i].CharLimit = 100
 		inputs[i].Width = 40
 	}
 	inputs[0].Focus()
 
 	m.formInputs = inputs
+	m.formBools = bools
 }
 
 func (m *Model) hostFormUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -88,11 +95,8 @@ func (m *Model) hostFormUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.updateFormFocus()
 		case " ":
 			if m.formFocus == 5 {
-				if yesNoToBool(m.formInputs[5].Value()) {
-					m.formInputs[5].SetValue(boolToYesNo(false))
-				} else {
-					m.formInputs[5].SetValue(boolToYesNo(true))
-				}
+				m.formBools[5] = !m.formBools[5]
+				m.formInputs[5].SetValue(boolToYesNo(m.formBools[5]))
 				return m, nil
 			}
 			m.formInputs[m.formFocus], _ = m.formInputs[m.formFocus].Update(msg)
@@ -109,7 +113,7 @@ func (m *Model) saveHostForm() error {
 	user := m.formInputs[2].Value()
 	rawPort := m.formInputs[3].Value()
 	keyPath := m.formInputs[4].Value()
-	saveHost := yesNoToBool(m.formInputs[5].Value())
+	saveHost := m.formBools[5]
 
 	if name == "" || address == "" || user == "" {
 		return locales.Errorf("errors.nameAddressUserRequired")

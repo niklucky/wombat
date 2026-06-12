@@ -27,6 +27,7 @@ type Model struct {
 	hostTable   table.Model
 
 	formInputs    []textinput.Model
+	formBools     []bool
 	formFocus     int
 	formIsCreate  bool
 	editingTunnel *core.Tunnel
