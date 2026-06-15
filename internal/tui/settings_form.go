@@ -2,8 +2,8 @@ package tui
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -41,6 +41,8 @@ func (m *Model) initSettingsForm() {
 		inputs[i].CharLimit = 100
 		inputs[i].Width = 50
 	}
+	// App-home paths can be much longer than the default char limit; allow them.
+	inputs[0].CharLimit = 0
 	inputs[0].Focus()
 
 	m.formInputs = inputs
@@ -111,39 +113,52 @@ func (m *Model) saveSettingsForm() (bool, error) {
 	}
 
 	oldHome, _ := core.AppHome()
-	homeChanged := filepath.Clean(oldHome) != filepath.Clean(newHome)
+	homeChanged := !appHomePathsEqual(oldHome, newHome)
 
-	// If app home changed, stop all tunnels and clean up old location
+	m.config.OpenTray = openTray
+	m.config.ShowNotify = showNotify
+
+	// If app home changed, stop all tunnels, point to the new location, and save
+	// there. If saving fails, restore the old pointer so the existing config is
+	// still discoverable and is not lost.
 	if homeChanged {
-		// Stop all active tunnels
+		// Stop all active tunnels before moving home.
 		for _, t := range m.config.Tunnels {
 			if tunnelmgr.IsRunning(t.Name) {
 				_ = tunnelmgr.StopDaemon(t.Name)
 			}
 		}
 
-		// Clean up old PID and log directories
-		oldPidDir := filepath.Join(oldHome, "pids")
-		oldLogDir := filepath.Join(oldHome, "logs")
-		_ = os.RemoveAll(oldPidDir)
-		_ = os.RemoveAll(oldLogDir)
-
-		// Try to remove old config.json so we don't leave stale data
-		oldConfig := filepath.Join(oldHome, "config.json")
-		_ = os.Remove(oldConfig)
-
-		// Update pointer
 		if err := core.SetAppHome(newHome); err != nil {
 			return false, locales.Errorf("errors.setAppHome", err)
 		}
 
+		if err := m.config.Save(); err != nil {
+			_ = core.SetAppHome(oldHome)
+			return false, err
+		}
+
 		notify.Notify(locales.T("app.title"), fmt.Sprintf(locales.T("messages.appHomeMoved"), newHome))
+		return true, nil
 	}
 
-	m.config.OpenTray = openTray
-	m.config.ShowNotify = showNotify
+	return false, m.config.Save()
+}
 
-	return homeChanged, m.config.Save()
+// appHomePathsEqual reports whether two app-home paths refer to the same
+// location. It cleans the paths and, on case-insensitive filesystems, compares
+// them without regard to case so that cosmetic differences don't trigger a
+// destructive home move.
+func appHomePathsEqual(a, b string) bool {
+	cleanA := filepath.Clean(a)
+	cleanB := filepath.Clean(b)
+	if cleanA == cleanB {
+		return true
+	}
+	if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
+		return strings.EqualFold(cleanA, cleanB)
+	}
+	return false
 }
 
 func (m *Model) settingsFormView() string {

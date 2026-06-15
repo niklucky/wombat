@@ -142,6 +142,27 @@ func RemoveLogFile(name string) error {
 	return os.Remove(path)
 }
 
+// TrayLogFilePath returns the path to the tray daemon log file.
+func TrayLogFilePath() (string, error) {
+	dir, err := LogDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "tray-daemon.log"), nil
+}
+
+// OpenTrayLogFile opens the tray daemon log file, creating directories if needed.
+func OpenTrayLogFile() (*os.File, error) {
+	path, err := TrayLogFilePath()
+	if err != nil {
+		return nil, err
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return nil, err
+	}
+	return os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+}
+
 // TrayPidFilePath returns the path to the tray daemon PID file.
 func TrayPidFilePath() (string, error) {
 	dir, err := PidDir()

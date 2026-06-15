@@ -25,9 +25,24 @@ import (
 // to keep tunnel state in sync. It runs the tray event loop and logs and alerts on errors.
 // When the event loop exits, the tray PID file is removed.
 func RunWithTunnels(cfg core.Config) {
+	// Cocoa/AppKit calls must run on the main OS thread. Lock the current
+	// goroutine to its thread before any platform GUI work.
+	runtime.LockOSThread()
+
+	// Initialize NSApplication before touching NSStatusBar. On some macOS
+	// configurations this avoids an abort in CGSConnectionByID.
+	if err := ensureNSApplicationInitialized(); err != nil {
+		log.Printf("failed to pre-initialize NSApplication: %v", err)
+	}
+
 	tray := systray.New()
 	if assets.TrayIcon != nil {
-		tray.SetIcon(assets.TrayIcon)
+		if runtime.GOOS == "darwin" {
+			// Template icons adapt automatically to light/dark menu bar.
+			tray.SetTemplateIcon(assets.TrayIcon)
+		} else {
+			tray.SetIcon(assets.TrayIcon)
+		}
 	}
 
 	var refresh func()
@@ -41,8 +56,11 @@ func RunWithTunnels(cfg core.Config) {
 	// because NSStatusItem suppresses the button action in favor of showing
 	// the menu. This is a platform limitation of gogpu/systray on macOS.
 	tray.Show()
+	log.Printf("tray icon shown")
 
-	_ = tunnelmgr.WriteTrayPidFile()
+	if err := tunnelmgr.WriteTrayPidFile(); err != nil {
+		log.Printf("failed to write tray PID file: %v", err)
+	}
 
 	// Refresh tray menu periodically so tunnel state stays in sync
 	// when tunnels are started/stopped outside the tray.
@@ -54,10 +72,12 @@ func RunWithTunnels(cfg core.Config) {
 		}
 	}()
 
+	log.Printf("entering tray event loop")
 	if err := tray.Run(); err != nil {
 		log.Printf("tray.Run failed: %v", err)
 		_ = notify.Alert(locales.T("app.title"), fmt.Sprintf(locales.T("tray.failed"), err))
 	}
+	log.Printf("tray event loop exited")
 	_ = tunnelmgr.RemoveTrayPidFile()
 }
 

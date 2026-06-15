@@ -1,6 +1,8 @@
 package core
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/niklucky/wombat/internal/models"
@@ -183,5 +185,49 @@ func TestConfigLoad_missingFileStartsEmpty(t *testing.T) {
 	}
 	if len(cfg.Tunnels) != 0 {
 		t.Errorf("expected 0 tunnels, got %d", len(cfg.Tunnels))
+	}
+}
+
+func TestConfigLoad_backwardsCompatibleWithOldFormats(t *testing.T) {
+	tmp := t.TempDir()
+	setTestHome(t, tmp)
+
+	// Pre-localization config: no language field. Also simulate the very first
+	// format by omitting open_tray/show_notifications to ensure unknown/missing
+	// fields do not cause data loss.
+	oldConfig := `{
+  "keys": [
+    {"path": "/home/user/.ssh/id_rsa", "fingerprint": "abc", "is_agent_loaded": true}
+  ],
+  "tunnels": [
+    {"name": "web", "host_name": "server", "local_port": 8080, "remote_host": "localhost", "remote_port": 80, "active": false}
+  ]
+}`
+
+	home, err := AppHome()
+	if err != nil {
+		t.Fatalf("app home: %v", err)
+	}
+	configPath := filepath.Join(home, "config.json")
+	if err := os.MkdirAll(filepath.Dir(configPath), 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	if err := os.WriteFile(configPath, []byte(oldConfig), 0600); err != nil {
+		t.Fatalf("write old config: %v", err)
+	}
+
+	cfg := DefaultConfig()
+	if err := cfg.Load(); err != nil {
+		t.Fatalf("load old config: %v", err)
+	}
+
+	if cfg.Language != "" {
+		t.Errorf("expected empty language for old config, got %q", cfg.Language)
+	}
+	if len(cfg.Keys) != 1 || cfg.Keys[0].Path != "/home/user/.ssh/id_rsa" {
+		t.Errorf("expected key to load, got %+v", cfg.Keys)
+	}
+	if len(cfg.Tunnels) != 1 || cfg.Tunnels[0].Name != "web" {
+		t.Errorf("expected tunnel to load, got %+v", cfg.Tunnels)
 	}
 }

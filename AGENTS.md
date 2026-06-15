@@ -1,5 +1,11 @@
 # Agent Notes for Wombat
 
+## Attention
+
+Before every session make backup copies of:
+* ~/.config/wombat/config.json -> /tmp/TIMESTAMP-wombat_config.json
+* ~/.ssh/config.d/wombat -> /tmp/TIMESTAMP-wombat_ssh_config
+
 ## Build & Development
 
 - Use `/usr/local/go/bin/go` if `go` is not on your PATH.

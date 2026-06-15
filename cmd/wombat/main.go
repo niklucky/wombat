@@ -415,6 +415,19 @@ var trayDaemonCmd = &cobra.Command{
 			return err
 		}
 		applyConfigLanguage(cfg)
+
+		// Persist all tray output (logs, panics) to a dedicated log file so
+		// failures on the friend's machine can be inspected afterwards.
+		logFile, err := tunnelmgr.OpenTrayLogFile()
+		if err == nil {
+			defer logFile.Close()
+			log.SetOutput(logFile)
+			log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+			os.Stderr = logFile
+			os.Stdout = logFile
+			log.Printf("tray-daemon starting (pid=%d)", os.Getpid())
+		}
+
 		tray.RunWithTunnels(cfg)
 		return nil
 	},
@@ -611,8 +624,37 @@ func startTrayDaemon() {
 	}
 	trayDaemon := exec.Command(exe, "tray-daemon")
 	trayDaemon.SysProcAttr = daemonSysProcAttr()
+
+	// Capture the child process's stdout/stderr to the tray log file so crashes
+	// and early errors are visible even when launched from the TUI.
+	logFile, err := tunnelmgr.OpenTrayLogFile()
+	if err == nil {
+		trayDaemon.Stdout = logFile
+		trayDaemon.Stderr = logFile
+	}
+	devNull, err := os.Open(os.DevNull)
+	if err == nil {
+		trayDaemon.Stdin = devNull
+	}
+
 	if err := trayDaemon.Start(); err != nil {
 		log.Printf("failed to start tray-daemon: %v", err)
+		if logFile != nil {
+			_ = logFile.Close()
+		}
+		if devNull != nil {
+			_ = devNull.Close()
+		}
+		return
+	}
+
+	// The child process inherits the open file descriptors; close our handles
+	// so we don't leak them in the parent.
+	if logFile != nil {
+		_ = logFile.Close()
+	}
+	if devNull != nil {
+		_ = devNull.Close()
 	}
 }
 
