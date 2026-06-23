@@ -59,6 +59,7 @@
       "user": "Usuario",
       "port": "Puerto",
       "keyPath": "Ruta de la clave",
+      "proxyJump": "ProxyJump",
       "saveToSSHHosts": "Guardar en hosts SSH",
       "hostAlias": "Alias del host",
       "localPort": "Puerto local",
@@ -74,6 +75,7 @@
       "user": "Usuario",
       "port": "Puerto",
       "keyPath": "Ruta de la clave",
+      "proxyJump": "Host ProxyJump (opcional)",
       "saveToSSHHosts": "Guardar en hosts SSH",
       "hostAlias": "Alias del host",
       "localPort": "Puerto local",
@@ -86,6 +88,7 @@
     "help": {
       "saveEscCancelTab": "[ctrl+s] guardar  [esc] cancelar  [tab] siguiente campo",
       "selectHost": "[enter] seleccionar host",
+      "selectProxyJump": "[enter] seleccionar host de salto",
       "toggle": "[space] alternar"
     },
     "titles": {

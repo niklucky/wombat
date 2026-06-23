@@ -2,11 +2,12 @@ package models
 
 // Host represents an SSH target.
 type Host struct {
-	Name    string `json:"name"`
-	Address string `json:"address"`
-	User    string `json:"user"`
-	Port    int    `json:"port"`
-	KeyPath string `json:"key_path"`
+	Name      string `json:"name"`
+	Address   string `json:"address"`
+	User      string `json:"user"`
+	Port      int    `json:"port"`
+	KeyPath   string `json:"key_path"`
+	ProxyJump string `json:"proxy_jump,omitempty"`
 }
 
 // Key represents an SSH key.

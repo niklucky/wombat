@@ -59,6 +59,7 @@
       "user": "Пользователь",
       "port": "Порт",
       "keyPath": "Путь к ключу",
+      "proxyJump": "ProxyJump",
       "saveToSSHHosts": "Сохранить в SSH-хосты",
       "hostAlias": "Алиас хоста",
       "localPort": "Локальный порт",
@@ -74,6 +75,7 @@
       "user": "Пользователь",
       "port": "Порт",
       "keyPath": "Путь к ключу",
+      "proxyJump": "ProxyJump хост (необязательно)",
       "saveToSSHHosts": "Сохранить в SSH-хосты",
       "hostAlias": "Алиас хоста",
       "localPort": "Локальный порт",
@@ -86,6 +88,7 @@
     "help": {
       "saveEscCancelTab": "[ctrl+s] сохранить  [esc] отмена  [tab] следующее поле",
       "selectHost": "[enter] выбрать хост",
+      "selectProxyJump": "[enter] выбрать промежуточный хост",
       "toggle": "[space] переключить"
     },
     "titles": {
