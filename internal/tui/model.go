@@ -47,6 +47,13 @@ type Model struct {
 	savedFormIsCreate  bool
 	savedEditingTunnel *core.Tunnel
 	hostSourceCursor   int
+
+	// host-form nested ProxyJump selection flow state
+	hostFormReturnView    string
+	savedHostFormInputs   []textinput.Model
+	savedHostFormFocus    int
+	savedHostFormIsCreate bool
+	savedEditingHost      *core.Host
 }
 
 // NewModel creates a new TUI model with the given config.

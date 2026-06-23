@@ -27,6 +27,9 @@ func WriteHosts(hosts []models.Host) error {
 		if h.KeyPath != "" {
 			fmt.Fprintf(&buf, "    IdentityFile %s\n", h.KeyPath)
 		}
+		if h.ProxyJump != "" {
+			fmt.Fprintf(&buf, "    ProxyJump %s\n", h.ProxyJump)
+		}
 		fmt.Fprintln(&buf)
 	}
 

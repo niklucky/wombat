@@ -10,7 +10,14 @@ func (m *Model) hostSourceUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc":
-			if m.returnView == "tunnel_form" {
+			switch m.returnView {
+			case "host_form":
+				m.restoreHostForm()
+				m.view = "host_form"
+				m.returnView = m.hostFormReturnView
+				m.hostFormReturnView = ""
+				return m, nil
+			case "tunnel_form":
 				m.restoreTunnelForm()
 				m.view = "tunnel_form"
 				m.returnView = ""

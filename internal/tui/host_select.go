@@ -21,7 +21,14 @@ func (m *Model) hostSelectUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 				idx := m.hostTable.Cursor()
 				if idx < len(m.config.Hosts) {
 					h := m.config.Hosts[idx]
-					if m.returnView == "tunnel_form" {
+					switch m.returnView {
+					case "host_form":
+						m.restoreHostForm()
+						m.formInputs[5].SetValue(h.Name)
+						m.view = "host_form"
+						m.returnView = m.hostFormReturnView
+						m.hostFormReturnView = ""
+					case "tunnel_form":
 						m.restoreTunnelForm()
 						m.formInputs[1].SetValue(h.Name)
 						m.view = "tunnel_form"

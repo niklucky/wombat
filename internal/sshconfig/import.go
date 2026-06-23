@@ -62,6 +62,9 @@ func ImportFromMainConfig() ([]models.Host, error) {
 			if val, err := cfg.Get(name, "IdentityFile"); err == nil && val != "" {
 				host.KeyPath = val
 			}
+			if val, err := cfg.Get(name, "ProxyJump"); err == nil && val != "" {
+				host.ProxyJump = val
+			}
 
 			hosts = append(hosts, host)
 		}
