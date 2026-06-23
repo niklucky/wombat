@@ -59,6 +59,7 @@
       "user": "用户",
       "port": "端口",
       "keyPath": "密钥路径",
+      "proxyJump": "ProxyJump",
       "saveToSSHHosts": "保存到 SSH 主机",
       "hostAlias": "主机别名",
       "localPort": "本地端口",
@@ -74,6 +75,7 @@
       "user": "用户",
       "port": "端口",
       "keyPath": "密钥路径",
+      "proxyJump": "ProxyJump 主机（可选）",
       "saveToSSHHosts": "保存到 SSH 主机",
       "hostAlias": "主机别名",
       "localPort": "本地端口",
@@ -86,6 +88,7 @@
     "help": {
       "saveEscCancelTab": "[ctrl+s] 保存  [esc] 取消  [tab] 下一字段",
       "selectHost": "[enter] 选择主机",
+      "selectProxyJump": "[enter] 选择跳转主机",
       "toggle": "[space] 切换"
     },
     "titles": {

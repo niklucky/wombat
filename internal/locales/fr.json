@@ -59,6 +59,7 @@
       "user": "Utilisateur",
       "port": "Port",
       "keyPath": "Chemin de la clé",
+      "proxyJump": "ProxyJump",
       "saveToSSHHosts": "Enregistrer dans les hôtes SSH",
       "hostAlias": "Alias de l'hôte",
       "localPort": "Port local",
@@ -74,6 +75,7 @@
       "user": "Utilisateur",
       "port": "Port",
       "keyPath": "Chemin de la clé",
+      "proxyJump": "Hôte de rebond ProxyJump (optionnel)",
       "saveToSSHHosts": "Enregistrer dans les hôtes SSH",
       "hostAlias": "Alias de l'hôte",
       "localPort": "Port local",
@@ -86,6 +88,7 @@
     "help": {
       "saveEscCancelTab": "[ctrl+s] enregistrer  [esc] annuler  [tab] champ suivant",
       "selectHost": "[enter] sélectionner l'hôte",
+      "selectProxyJump": "[enter] sélectionner l'hôte de rebond",
       "toggle": "[space] basculer"
     },
     "titles": {
