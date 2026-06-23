@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/niklucky/wombat/internal/core"
 	"github.com/niklucky/wombat/internal/locales"
 )
@@ -139,6 +140,8 @@ func (m *Model) hostFormUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *Model) saveHostFormState() {
 	m.savedHostFormInputs = make([]textinput.Model, len(m.formInputs))
 	copy(m.savedHostFormInputs, m.formInputs)
+	m.savedHostFormBools = make([]bool, len(m.formBools))
+	copy(m.savedHostFormBools, m.formBools)
 	m.savedHostFormFocus = m.formFocus
 	m.savedHostFormIsCreate = m.formIsCreateHost
 	m.savedEditingHost = m.editingHost
@@ -146,6 +149,8 @@ func (m *Model) saveHostFormState() {
 
 func (m *Model) restoreHostForm() {
 	m.formInputs = m.savedHostFormInputs
+	m.formBools = make([]bool, len(m.savedHostFormBools))
+	copy(m.formBools, m.savedHostFormBools)
 	m.formFocus = m.savedHostFormFocus
 	m.formIsCreateHost = m.savedHostFormIsCreate
 	m.editingHost = m.savedEditingHost

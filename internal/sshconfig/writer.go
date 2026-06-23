@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/niklucky/wombat/internal/models"
 )
@@ -12,7 +13,7 @@ import (
 // WriteHosts writes the given hosts to ~/.ssh/config.d/wombat in SSH config format.
 func WriteHosts(hosts []models.Host) error {
 	path := wombatConfigPath()
-	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return fmt.Errorf("create config.d: %w", err)
 	}
 
@@ -28,10 +29,13 @@ func WriteHosts(hosts []models.Host) error {
 			fmt.Fprintf(&buf, "    IdentityFile %s\n", h.KeyPath)
 		}
 		if h.ProxyJump != "" {
+			if strings.ContainsAny(h.ProxyJump, "\r\n") {
+				return fmt.Errorf("invalid ProxyJump value: contains newline")
+			}
 			fmt.Fprintf(&buf, "    ProxyJump %s\n", h.ProxyJump)
 		}
 		fmt.Fprintln(&buf)
 	}
 
-	return os.WriteFile(path, buf.Bytes(), 0600)
+	return os.WriteFile(path, buf.Bytes(), 0o600)
 }

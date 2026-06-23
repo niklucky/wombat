@@ -202,3 +202,40 @@ func TestHostFormUpdate_ctrlSFromTunnelFlowRestoresForm(t *testing.T) {
 		t.Errorf("expected host alias web, got %s", m.formInputs[1].Value())
 	}
 }
+
+func TestHostFormUpdate_ctrlSFromNestedHostFormRestoresSaveToggle(t *testing.T) {
+	m := Model{returnView: "host_form", view: "host_form"}
+	m.initHostForm(true, nil)
+
+	// Fill required fields so saveHostForm passes validation even though the
+	// save toggle is currently off.
+	m.formInputs[0].SetValue("host")
+	m.formInputs[1].SetValue("10.0.0.1")
+	m.formInputs[2].SetValue("root")
+
+	// Current nested form state has the save toggle turned off.
+	m.formInputs[6].SetValue(boolToYesNo(false))
+	m.formBools[6] = false
+
+	// Capture a saved host form state with the save toggle turned on.
+	m.savedHostFormInputs = make([]textinput.Model, len(m.formInputs))
+	copy(m.savedHostFormInputs, m.formInputs)
+	m.savedHostFormInputs[6].SetValue(boolToYesNo(true))
+	m.savedHostFormBools = make([]bool, len(m.formBools))
+	copy(m.savedHostFormBools, m.formBools)
+	m.savedHostFormBools[6] = true
+	m.savedHostFormFocus = 0
+	m.savedHostFormIsCreate = true
+
+	m.hostFormUpdate(tea.KeyMsg{Type: tea.KeyCtrlS})
+
+	if m.view != "host_form" {
+		t.Errorf("expected view host_form, got %s", m.view)
+	}
+	if m.formInputs[6].Value() != boolToYesNo(true) {
+		t.Errorf("expected restored save toggle value yes, got %s", m.formInputs[6].Value())
+	}
+	if m.formBools[6] != true {
+		t.Errorf("expected restored save toggle bool true, got %v", m.formBools[6])
+	}
+}

@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/niklucky/wombat/internal/core"
 	"github.com/niklucky/wombat/internal/locales"
 	"github.com/niklucky/wombat/internal/notify"
@@ -51,6 +52,7 @@ type Model struct {
 	// host-form nested ProxyJump selection flow state
 	hostFormReturnView    string
 	savedHostFormInputs   []textinput.Model
+	savedHostFormBools    []bool
 	savedHostFormFocus    int
 	savedHostFormIsCreate bool
 	savedEditingHost      *core.Host
