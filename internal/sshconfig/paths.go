@@ -19,7 +19,12 @@ func mainConfigPath() string {
 	return filepath.Join(sshDir(), "config")
 }
 
+// WombatConfigPath returns ~/.ssh/config.d/wombat.
+func WombatConfigPath() string {
+	return filepath.Join(sshDir(), "config.d", "wombat")
+}
+
 // wombatConfigPath returns ~/.ssh/config.d/wombat.
 func wombatConfigPath() string {
-	return filepath.Join(sshDir(), "config.d", "wombat")
+	return WombatConfigPath()
 }
