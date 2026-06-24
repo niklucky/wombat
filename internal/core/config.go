@@ -66,7 +66,11 @@ func (c *Config) Load() error {
 		}
 		// File doesn't exist — start empty
 		*c = DefaultConfig()
-		c.Hosts, _ = sshconfig.ReadHosts()
+		hosts, err := sshconfig.ReadHosts()
+		if err != nil {
+			return err
+		}
+		c.Hosts = hosts
 		return nil
 	}
 
@@ -178,8 +182,10 @@ func (c *Config) migrate(configPath string, oldVersion int) error {
 
 // backupFile copies src to src{suffix}. If that destination already exists,
 // it appends a numeric counter (e.g. .v0.1, .v0.2) until a free name is found.
+// The backup file is created with the same permissions as the source file.
 func backupFile(src, suffix string) (string, error) {
-	if _, err := os.Stat(src); err != nil {
+	info, err := os.Stat(src)
+	if err != nil {
 		if os.IsNotExist(err) {
 			return "", err
 		}
@@ -202,17 +208,30 @@ func backupFile(src, suffix string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer srcFile.Close()
 
-	dstFile, err := os.Create(dst)
+	dstFile, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, info.Mode().Perm())
 	if err != nil {
+		srcFile.Close()
 		return "", err
 	}
-	defer dstFile.Close()
 
-	if _, err := io.Copy(dstFile, srcFile); err != nil {
-		return "", err
+	_, copyErr := io.Copy(dstFile, srcFile)
+
+	// Explicitly close and surface errors. A failed close on the destination
+	// file can indicate an incomplete write, so that error must be checked.
+	srcCloseErr := srcFile.Close()
+	dstCloseErr := dstFile.Close()
+
+	if copyErr != nil {
+		return "", copyErr
 	}
+	if dstCloseErr != nil {
+		return "", dstCloseErr
+	}
+	if srcCloseErr != nil {
+		return "", srcCloseErr
+	}
+
 	return dst, nil
 }
 
