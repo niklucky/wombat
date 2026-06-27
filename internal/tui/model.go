@@ -56,6 +56,9 @@ type Model struct {
 	savedHostFormFocus    int
 	savedHostFormIsCreate bool
 	savedEditingHost      *core.Host
+
+	// Version is the application version injected at build time.
+	Version string
 }
 
 // NewModel creates a new TUI model with the given config.
@@ -82,6 +85,14 @@ func NewModelWithEdit(cfg core.Config, editTunnelName string) Model {
 		}
 	}
 	return m
+}
+
+// versionString returns the version to display, defaulting to "dev".
+func (m Model) versionString() string {
+	if m.Version == "" {
+		return "dev"
+	}
+	return m.Version
 }
 
 // refreshTickMsg triggers a background refresh of tunnel rows.

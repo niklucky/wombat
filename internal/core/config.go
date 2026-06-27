@@ -183,6 +183,7 @@ func (c *Config) migrate(configPath string, oldVersion int) error {
 // backupFile copies src to src{suffix}. If that destination already exists,
 // it appends a numeric counter (e.g. .v0.1, .v0.2) until a free name is found.
 // The backup file is created with the same permissions as the source file.
+// The destination name is reserved atomically with O_EXCL to avoid races.
 func backupFile(src, suffix string) (string, error) {
 	info, err := os.Stat(src)
 	if err != nil {
@@ -192,47 +193,44 @@ func backupFile(src, suffix string) (string, error) {
 		return "", err
 	}
 
-	dst := src + suffix
-	for i := 1; ; i++ {
-		_, err := os.Stat(dst)
-		if err != nil {
-			if os.IsNotExist(err) {
-				break
-			}
-			return "", err
-		}
-		dst = fmt.Sprintf("%s%s.%d", src, suffix, i)
-	}
-
 	srcFile, err := os.Open(src)
 	if err != nil {
 		return "", err
 	}
 
-	dstFile, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, info.Mode().Perm())
-	if err != nil {
-		srcFile.Close()
-		return "", err
-	}
+	dst := src + suffix
+	for i := 1; ; i++ {
+		dstFile, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_EXCL, info.Mode().Perm())
+		if err == nil {
+			_, copyErr := io.Copy(dstFile, srcFile)
 
-	_, copyErr := io.Copy(dstFile, srcFile)
+			// Explicitly close and surface errors. A failed close on the
+			// destination file can indicate an incomplete write, so that error
+			// must be checked.
+			srcCloseErr := srcFile.Close()
+			dstCloseErr := dstFile.Close()
 
-	// Explicitly close and surface errors. A failed close on the destination
-	// file can indicate an incomplete write, so that error must be checked.
-	srcCloseErr := srcFile.Close()
-	dstCloseErr := dstFile.Close()
+			if copyErr != nil {
+				return "", copyErr
+			}
+			if dstCloseErr != nil {
+				return "", dstCloseErr
+			}
+			if srcCloseErr != nil {
+				return "", srcCloseErr
+			}
 
-	if copyErr != nil {
-		return "", copyErr
-	}
-	if dstCloseErr != nil {
-		return "", dstCloseErr
-	}
-	if srcCloseErr != nil {
-		return "", srcCloseErr
-	}
+			return dst, nil
+		}
 
-	return dst, nil
+		if !os.IsExist(err) {
+			srcFile.Close()
+			return "", err
+		}
+
+		// dst already exists; try the next counter suffix.
+		dst = fmt.Sprintf("%s%s.%d", src, suffix, i)
+	}
 }
 
 // transformConfig applies version-specific transformations when migrating from
