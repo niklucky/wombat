@@ -127,7 +127,7 @@ func (c *Config) Save() error {
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
 
@@ -150,7 +150,7 @@ func (c *Config) Save() error {
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(path, data, 0600); err != nil {
+	if err := os.WriteFile(path, data, 0o600); err != nil {
 		return err
 	}
 
@@ -211,12 +211,15 @@ func backupFile(src, suffix string) (string, error) {
 			dstCloseErr := dstFile.Close()
 
 			if copyErr != nil {
+				_ = os.Remove(dst)
 				return "", copyErr
 			}
 			if dstCloseErr != nil {
+				_ = os.Remove(dst)
 				return "", dstCloseErr
 			}
 			if srcCloseErr != nil {
+				_ = os.Remove(dst)
 				return "", srcCloseErr
 			}
 
@@ -224,7 +227,9 @@ func backupFile(src, suffix string) (string, error) {
 		}
 
 		if !os.IsExist(err) {
-			srcFile.Close()
+			if closeErr := srcFile.Close(); closeErr != nil {
+				return "", fmt.Errorf("%w; close src: %v", err, closeErr)
+			}
 			return "", err
 		}
 
