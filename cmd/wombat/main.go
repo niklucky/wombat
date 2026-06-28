@@ -10,7 +10,6 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/spf13/cobra"
 	"github.com/niklucky/wombat/internal/core"
 	"github.com/niklucky/wombat/internal/locales"
 	"github.com/niklucky/wombat/internal/sshconfig"
@@ -18,6 +17,7 @@ import (
 	"github.com/niklucky/wombat/internal/tray"
 	"github.com/niklucky/wombat/internal/tui"
 	"github.com/niklucky/wombat/internal/tunnelmgr"
+	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
@@ -44,7 +44,9 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Start TUI
-		p := tea.NewProgram(tui.NewModel(cfg), tea.WithAltScreen())
+		m := tui.NewModel(cfg)
+		m.Version = version
+		p := tea.NewProgram(m, tea.WithAltScreen())
 		finalModel, err := p.Run()
 		if err != nil {
 			return err
@@ -557,7 +559,9 @@ var tuiCmd = &cobra.Command{
 		}
 
 		editTunnelName, _ := cmd.Flags().GetString("edit-tunnel")
-		p := tea.NewProgram(tui.NewModelWithEdit(cfg, editTunnelName), tea.WithAltScreen())
+		m := tui.NewModelWithEdit(cfg, editTunnelName)
+		m.Version = version
+		p := tea.NewProgram(m, tea.WithAltScreen())
 		finalModel, err := p.Run()
 		if err != nil {
 			return err

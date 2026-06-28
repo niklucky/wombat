@@ -102,15 +102,15 @@ func (m *Model) activeTable() *table.Model {
 
 func (m *Model) renderTableView() string {
 	// Title
-	s := titleStyle.Render("  "+locales.T("app.title")) + "\n"
+	s := titleStyle.Render("  "+locales.T("app.title")) + " " + versionStyle.Render("v"+m.versionString()) + "\n"
 	s += subtitleStyle.Render("  "+locales.T("app.subtitle")) + "\n\n"
 
 	// Actions bar
 	s += "  " + locales.T("actions.label") + " "
-	s += actionStyle.Render("[?]") + helpStyle.Render(" " + locales.T("actions.help") + " ")
-	s += actionStyle.Render("[s]") + helpStyle.Render(" " + locales.T("actions.settings") + " ")
-	s += actionStyle.Render("[⇥]") + helpStyle.Render(" " + locales.T("actions.selectTab") + " ")
-	s += actionStyle.Render("[q]") + helpStyle.Render(" " + locales.T("actions.quit") + " ")
+	s += actionStyle.Render("[?]") + helpStyle.Render(" "+locales.T("actions.help")+" ")
+	s += actionStyle.Render("[s]") + helpStyle.Render(" "+locales.T("actions.settings")+" ")
+	s += actionStyle.Render("[⇥]") + helpStyle.Render(" "+locales.T("actions.selectTab")+" ")
+	s += actionStyle.Render("[q]") + helpStyle.Render(" "+locales.T("actions.quit")+" ")
 	s += "\n\n"
 
 	// Tabs

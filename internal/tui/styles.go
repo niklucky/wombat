@@ -50,4 +50,7 @@ var (
 	confirmKeyStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color(primary)).
 			Bold(true)
+
+	versionStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#888888"))
 )

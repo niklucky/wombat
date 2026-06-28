@@ -40,5 +40,6 @@ jobs:
         run: go vet ./...
 
       - name: Build (default)
-        run: go build ./cmd/wombat
+        shell: bash
+        run: make build
 

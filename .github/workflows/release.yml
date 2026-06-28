@@ -40,6 +40,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # 6.0.2
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Set up Go
@@ -52,15 +53,10 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
+          EXT: ${{ matrix.ext }}
+          BINARY_NAME: wombat
           CGO_ENABLED: ${{ matrix.goos == 'darwin' && '1' || '0' }}
-        run: |
-          mkdir -p dist
-          ldflags="-s -w"
-          if [ "${{ github.ref_name }}" != "" ]; then
-            ldflags="${ldflags} -X main.version=${{ github.ref_name }}"
-          fi
-          cd cmd/wombat
-          go build -ldflags="${ldflags}" -o "../../dist/wombat${{ matrix.ext }}" .
+        run: make build
 
       - name: Package
         shell: bash

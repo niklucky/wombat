@@ -28,6 +28,6 @@ Before every session make backup copies of:
 
 ## Testing Proof-of-Life
 
-1. `make build` should produce a runnable `wombat` binary.
+1. `make build` should produce a runnable `dist/wombat` binary.
 2. `wombat tui` should show a host list (or "No hosts configured").
 3. `wombat tray-daemon` should show a tray icon with a menu.
