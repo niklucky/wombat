@@ -19,6 +19,18 @@ A cross-platform SSH helper built with Go. Features a Terminal UI (TUI), system 
 curl -LsSf https://raw.githubusercontent.com/niklucky/wombat/main/scripts/install.sh | bash
 ```
 
+### Homebrew (macOS / Linux)
+
+```bash
+brew install niklucky/tap/wombat
+```
+
+### Snap (Linux)
+
+```bash
+snap install wombat --classic
+```
+
 ### Windows (PowerShell)
 
 ```powershell

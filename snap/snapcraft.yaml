@@ -1,0 +1,26 @@
+name: wombat
+base: core24
+adopt-info: wombat
+summary: SSH tunnel manager with TUI and system tray
+description: |
+  Wombat is a cross-platform SSH helper featuring a Terminal User Interface (TUI),
+  system tray application, and desktop notifications for managing SSH hosts,
+  keys, and tunnels.
+
+grade: stable
+confinement: classic
+
+parts:
+  wombat:
+    plugin: go
+    source: .
+    source-type: git
+    build-snaps:
+      - go
+    override-pull: |
+      craftctl default
+      craftctl set version=$(git describe --tags --always --dirty 2>/dev/null || echo "dev")
+
+apps:
+  wombat:
+    command: bin/wombat
